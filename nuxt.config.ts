@@ -1,17 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import Aura from "@primeuix/themes/aura";
-import Lara from "@primeuix/themes/lara";
+import Aura from '@primeuix/themes/aura';
+import Lara from '@primeuix/themes/lara';
 
 export default defineNuxtConfig({
-  compatibilityDate: "2024-11-01",
+  compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: [
     // "@unocss/nuxt",
-    "v-gsap-nuxt",
-    "@sidebase/nuxt-auth",
-    "@vueuse/nuxt",
-    "@primevue/nuxt-module",
-    "@nuxtjs/tailwindcss",
+    'v-gsap-nuxt',
+    '@sidebase/nuxt-auth',
+    '@vueuse/nuxt',
+    '@primevue/nuxt-module',
+    '@nuxtjs/tailwindcss',
+    '@nuxtjs/google-fonts',
   ],
   runtimeConfig: {
     public: {
@@ -21,16 +22,22 @@ export default defineNuxtConfig({
     databaseUrl: process.env.POSTGRES_PRISMA_URL,
     postgresUser: process.env.POSTGRES_USER,
   },
+  googleFonts: {
+    families: {
+      'EB Garamond': true,
+    },
+    preload: true,
+  },
   auth: {
     isEnabled: false,
     disableServerSideAuth: false,
-    originEnvKey: "AUTH_ORIGIN",
-    baseURL: "http://localhost:3000/api/auth",
+    originEnvKey: 'AUTH_ORIGIN',
+    baseURL: 'http://localhost:3000/api/auth',
     provider: {
-      type: "authjs",
+      type: 'authjs',
       trustHost: false,
-      defaultProvider: "",
-      addDefaultCallbackUrl: "/",
+      defaultProvider: '',
+      addDefaultCallbackUrl: '/',
     },
     sessionRefresh: {
       enablePeriodically: true,
@@ -42,13 +49,13 @@ export default defineNuxtConfig({
       websocket: true,
     },
   },
-  css: ["~/assets/styles.scss"],
+  css: ['~/assets/styles.scss'],
   primevue: {
     options: {
       theme: {
         preset: Aura,
         options: {
-          darkModeSelector: ".app-dark",
+          darkModeSelector: '.app-dark',
         },
       },
     },
