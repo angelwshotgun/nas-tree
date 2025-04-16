@@ -6,7 +6,6 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
   modules: [
-    "@prisma/nuxt",
     // "@unocss/nuxt",
     "v-gsap-nuxt",
     "@sidebase/nuxt-auth",
@@ -21,9 +20,6 @@ export default defineNuxtConfig({
     supabaseJwtSecret: process.env.SUPABASE_JWT_SECRET,
     databaseUrl: process.env.POSTGRES_PRISMA_URL,
     postgresUser: process.env.POSTGRES_USER,
-  },
-  prisma: {
-    autoSetupPrisma: true,
   },
   auth: {
     isEnabled: true,
