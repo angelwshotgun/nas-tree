@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     preload: true,
   },
   auth: {
-    isEnabled: true,
+    isEnabled: false,
     disableServerSideAuth: false,
     originEnvKey: 'AUTH_ORIGIN',
     baseURL: 'https://nas-tree.nuxt.dev/api/auth',
