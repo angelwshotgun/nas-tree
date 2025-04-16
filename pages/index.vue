@@ -1,6 +1,6 @@
 <template>
   <div
-    class="card flex justify-content items-center flex-col min-h-[calc(100vh-94px-2rem)]"
+    class="card flex justify-content items-center flex-col min-h-[calc(100vh-94px)]"
   >
     <div class="p-4 w-full mx-auto">
       <!-- Search Bar -->
@@ -49,6 +49,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: "main",
+  auth: false,
 });
 </script>
 

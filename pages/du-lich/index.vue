@@ -1,6 +1,15 @@
 <template>
-  <div class="card mx-auto">
-    <!-- Destination Info Section -->
+  <div class="card mx-auto min-h-[calc(100vh-94px)]">
+    <div class="p-4 w-full mx-auto">
+      <!-- Search Bar -->
+      <IconField class="w-[60%] mb-4 rounded-lg mx-auto">
+        <InputIcon class="pi pi-search" />
+        <InputText
+          class="w-full p-3 rounded-lg shadow-lg"
+          placeholder="Tìm kiếm"
+        />
+      </IconField>
+    </div>
     <div class="flex flex-col md:flex-row gap-4 mb-6">
       <!-- Text Content -->
       <div class="flex-1">
@@ -75,6 +84,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'main',
+  auth: false,
 });
 </script>
 
