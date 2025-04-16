@@ -25,7 +25,7 @@ export default defineNuxtConfig({
     isEnabled: true,
     disableServerSideAuth: false,
     originEnvKey: 'AUTH_ORIGIN',
-    baseURL: process.env.BASE_URL ? `https://${process.env.BASE_URL}/api/auth` : undefined,
+    baseURL: 'https://nas-tree.nuxt.dev/api/auth',
     provider: {
       type: 'authjs',
       trustHost: false,
@@ -40,6 +40,7 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       websocket: true,
+      openAPI: true,
     },
   },
   css: ['~/assets/styles.scss'],
