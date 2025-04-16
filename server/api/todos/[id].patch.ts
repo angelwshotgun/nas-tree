@@ -1,4 +1,4 @@
-export default eventHandler(async (event) => {
+export default defineEventHandler(async (event) => {
     const { id } = getRouterParams(event)
     const { completed } = await readBody(event)
   

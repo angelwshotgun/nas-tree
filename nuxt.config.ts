@@ -18,12 +18,6 @@ export default defineNuxtConfig({
   hub: {
     remote: true,
     database: true,
-    storage: {
-      database: true,
-    },
-    databaseMigrationsDirs: [
-      '/server/database/migrations',
-    ],
   },
   runtimeConfig: {
     public: {
@@ -56,6 +50,7 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
+    preset: 'cloudflare-pages',
     experimental: {
       websocket: true,
       openAPI: true,
