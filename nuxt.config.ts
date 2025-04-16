@@ -7,6 +7,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [// "@unocss/nuxt",
   'v-gsap-nuxt', '@sidebase/nuxt-auth', '@vueuse/nuxt', '@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/google-fonts', '@nuxthub/core'],
+  hub: {
+    remote: true,
+    database: true,
+  },
   runtimeConfig: {
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
