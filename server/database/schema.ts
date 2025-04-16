@@ -8,3 +8,8 @@ export const users = sqliteTable('users', {
   avatar: text('avatar').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 })
+export const todos = sqliteTable('todos', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+})

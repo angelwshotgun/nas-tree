@@ -6,7 +6,8 @@ import * as schema from '../database/schema'
 export const tables = schema
 
 export function useDrizzle() {
-  return drizzle(hubDatabase(), { schema })
+  return drizzle(hubDatabase(), { schema, logger: true })
 }
 
 export type User = typeof schema.users.$inferSelect
+export type Todos = typeof schema.todos.$inferSelect;;
