@@ -38,3 +38,5 @@ jobs:
         id: deploy
         with:
           project-key: nas-tree-oee1
+        env:
+          NUXT_HUB_PROJECT_URL: https://nas-tree.nuxt.dev

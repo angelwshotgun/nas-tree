@@ -174,8 +174,17 @@
     --p-button-link-color: var(--p-primary-color);
     --p-button-link-hover-color: var(--p-primary-color);
     --p-button-link-active-color: var(--p-primary-color);
+    --p-breadcrumb-padding: 0.5rem !important;
 }
 
 body {
   font-family: 'EB Garamond', serif;
+}
+
+.p-toolbar {
+  margin: 0.5rem;
+}
+
+.p-toolbar-center {
+  width: 55%;
 }

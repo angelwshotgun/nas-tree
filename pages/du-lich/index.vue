@@ -1,15 +1,43 @@
 <template>
-  <div class="card mx-auto min-h-[calc(100vh-94px)]">
-    <div class="p-4 w-full mx-auto">
-      <!-- Search Bar -->
-      <IconField class="w-[60%] mb-4 rounded-lg mx-auto">
-        <InputIcon class="pi pi-search" />
-        <InputText
-          class="w-full p-3 rounded-lg shadow-lg"
-          placeholder="Tìm kiếm"
-        />
+  <Toolbar>
+    <template #start>
+      <Breadcrumb :home="home" :model="items">
+        <template #item="{ item, props }">
+          <NuxtLink
+            v-if="item.route"
+            v-slot="{ href, navigate }"
+            :to="item.route"
+            custom
+          >
+            <a :href="href" v-bind="props.action" @click="navigate">
+              <span :class="[item.icon, 'text-color']" />
+              <span class="text-primary font-semibold">{{ item.label }}</span>
+            </a>
+          </NuxtLink>
+          <a
+            v-else
+            :href="item.url"
+            :target="item.target"
+            v-bind="props.action"
+          >
+            <span class="text-surface-700 dark:text-surface-0">{{
+              item.label
+            }}</span>
+          </a>
+        </template>
+      </Breadcrumb>
+    </template>
+
+    <template #center>
+      <IconField class="w-full">
+        <InputIcon>
+          <i class="pi pi-search" />
+        </InputIcon>
+        <InputText placeholder="Tìm kiếm" class="w-full" />
       </IconField>
-    </div>
+    </template>
+  </Toolbar>
+  <div class="card mx-auto min-h-[calc(100vh-94px)]">
     <div class="flex flex-col md:flex-row gap-4 mb-6">
       <!-- Text Content -->
       <div class="flex-1">
@@ -83,9 +111,15 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'main',
+  layout: "main",
   auth: false,
 });
+
+const home = ref({
+  icon: "pi pi-home",
+  route: "/",
+});
+const items = ref([{ label: "Du lịch", route: "/du-lich" }]);
 </script>
 
 <style scoped></style>

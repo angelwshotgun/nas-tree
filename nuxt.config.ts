@@ -34,7 +34,7 @@ export default defineNuxtConfig({
     preload: true,
   },
   auth: {
-    isEnabled: false,
+    isEnabled: true,
     disableServerSideAuth: false,
     originEnvKey: 'AUTH_ORIGIN',
     baseURL: 'https://nas-tree.nuxt.dev/api/auth',
@@ -50,7 +50,7 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    preset: 'cloudflare-pages',
+    preset: 'cloudflare_pages',
     experimental: {
       websocket: true,
       openAPI: true,
