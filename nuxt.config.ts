@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     postgresUser: process.env.POSTGRES_USER,
   },
   auth: {
-    isEnabled: true,
+    isEnabled: false,
     disableServerSideAuth: false,
     originEnvKey: "AUTH_ORIGIN",
     baseURL: "http://localhost:3000/api/auth",
