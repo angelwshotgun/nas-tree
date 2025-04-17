@@ -1,11 +1,5 @@
 import { sqliteTable, text, integer, unique, primaryKey } from "drizzle-orm/sqlite-core";
 
-export const todos = sqliteTable("todos", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  title: text("title").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-});
-
 export const users = sqliteTable("user", {
   id: text("id")
     .primaryKey()
@@ -84,3 +78,23 @@ export const authenticators = sqliteTable(
     }),
   })
 )
+
+export const thumuc = sqliteTable("thumuc", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  ten_thumuc: text("ten_thumuc").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const baiviet = sqliteTable("baiviet", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  tieu_de: text("tieu_de").notNull(),
+  noi_dung: text("noi_dung").notNull(),
+  anh: text("anh"),
+  vi_tri: text("vi_tri"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  thumucId: integer("thumuc_id")
+    .notNull()
+    .references(() => thumuc.id, { onDelete: "cascade" }),
+});

@@ -8,7 +8,6 @@ export default defineEventHandler(async (event) => {
     .select({
       name: tables.users.name,
       image: tables.users.image,
-      role: tables.users.role
     })
     .from(tables.users)
     .where(eq(tables.users.id, userId))
@@ -21,6 +20,5 @@ export default defineEventHandler(async (event) => {
   return {
     name: user.name,
     avatar: user.image,
-    role: user.role || "user",
   };
 });

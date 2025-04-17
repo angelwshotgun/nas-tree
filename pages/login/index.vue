@@ -144,15 +144,11 @@ watchEffect(() => {
 
 const login = async () => {
   try {
-    const res = await signIn('credentials', {
+    await signIn('credentials', {
       email: email.value,
       password: password.value,
       redirect: false, // Ngăn redirect, nhận lỗi qua `res.error`
     });
-
-    if (res) {
-      errorMessage.value = 'Thông tin đăng nhập không chính xác!';
-    }
   } catch (error) {
     errorMessage.value = 'Đăng nhập thất bại, kiểm tra lại thông tin!';
   }

@@ -1,43 +1,43 @@
-import { NuxtAuthHandler } from '#auth';
-import { DrizzleAdapter } from '@auth/drizzle-adapter';
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { eq } from 'drizzle-orm';
+import { NuxtAuthHandler } from "#auth";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { eq } from "drizzle-orm";
 
 const db = useDrizzle();
 
 export default NuxtAuthHandler({
   adapter: DrizzleAdapter(db) as any,
-  secret: process.env.AUTH_SECRET || 'your-secret-here',
+  secret: process.env.AUTH_SECRET || "your-secret-here",
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: any) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password are required');
+          return null;
         }
 
         const [user] = await db
           .select()
           .from(tables.users)
-          .where(eq(tables.users.email, credentials.email as string))
+          .where(eq(tables.users.email, credentials.email))
           .limit(1);
 
         if (!user || !user.password) {
-          throw new Error('No user found');
+          return null;
         }
 
         // In a real app, you should use proper password hashing like bcrypt
         if (credentials.password !== user.password) {
-          throw new Error('Invalid password');
+          return null;
         }
 
         return {
@@ -46,7 +46,7 @@ export default NuxtAuthHandler({
           name: user.name,
         };
       },
-    }),
+    }) as any,
   ],
   callbacks: {
     async session({ session, token }) {
@@ -63,6 +63,6 @@ export default NuxtAuthHandler({
     },
   },
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
 });
