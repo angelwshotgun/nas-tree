@@ -37,7 +37,8 @@ export default defineNuxtConfig({
     isEnabled: true,
     disableServerSideAuth: false,
     originEnvKey: 'AUTH_ORIGIN',
-    baseURL: 'https://nas-tree.nuxt.dev/api/auth',
+    // baseURL: 'https://nas-tree.nuxt.dev/api/auth',
+    baseURL: 'http://localhost:3000/api/auth',
     provider: {
       type: 'authjs',
       trustHost: false,
@@ -47,6 +48,9 @@ export default defineNuxtConfig({
     sessionRefresh: {
       enablePeriodically: true,
       enableOnWindowFocus: true,
+    },
+    globalAppMiddleware: {
+      isEnabled: false,
     },
   },
   nitro: {

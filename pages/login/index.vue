@@ -93,7 +93,7 @@
                 :feedback="false"
               ></Password>
 
-              <div class="flex items-center justify-between mt-2 mb-8 gap-8">
+              <div class="flex items-center justify-between mt-2 mb-4">
                 <div class="flex items-center">
                   <Checkbox
                     v-model="checked"
@@ -104,9 +104,15 @@
                   <label for="rememberme1">Nhớ đăng nhập</label>
                 </div>
                 <span
-                  class="font-medium no-underline ml-2 text-right cursor-pointer text-primary"
+                  class="font-medium no-underline text-right cursor-pointer text-primary"
                   >Quên mật khẩu?</span
                 >
+              </div>
+              <div
+                v-if="errorMessage"
+                class="text-red-500 mb-4 text-center"
+              >
+                {{ errorMessage }}
               </div>
               <Button type="submit" label="Đăng nhập" class="w-full"></Button>
             </form>
@@ -119,30 +125,36 @@
 
 <script setup>
 definePageMeta({
-  layout: "none",
+  layout: 'none',
+  auth: { unauthenticatedOnly: true, navigateAuthenticatedTo: '/nas' },
 });
 
-const email = ref("zmalqp123@gmail.com");
-const password = ref("zmalqp123");
-const errorMessage = ref("");
+const email = ref('zmalqp123@gmail.com');
+const password = ref('zmalqp123');
+const errorMessage = ref('');
 const { signIn, status } = useAuth();
 const router = useRouter();
 const checked = ref(false);
 
 watchEffect(() => {
-  if (status.value === "authenticated") {
-    router.push("/nas"); // Chuyển hướng sau khi đăng nhập thành công
+  if (status.value === 'authenticated') {
+    router.push('/nas'); // Chuyển hướng sau khi đăng nhập thành công
   }
 });
 
 const login = async () => {
   try {
-    await signIn("credentials", {
+    const res = await signIn('credentials', {
       email: email.value,
       password: password.value,
+      redirect: false, // Ngăn redirect, nhận lỗi qua `res.error`
     });
+
+    if (res) {
+      errorMessage.value = 'Thông tin đăng nhập không chính xác!';
+    }
   } catch (error) {
-    errorMessage.value = "Đăng nhập thất bại, kiểm tra lại thông tin!";
+    errorMessage.value = 'Đăng nhập thất bại, kiểm tra lại thông tin!';
   }
 };
 </script>
