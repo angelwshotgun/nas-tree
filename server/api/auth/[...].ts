@@ -1,6 +1,6 @@
 import { NuxtAuthHandler } from '#auth';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
-import CredentialsProvider from '@auth/core/providers/credentials';
+import CredentialsProvider from 'next-auth/providers/credentials'
 import { eq } from 'drizzle-orm';
 
 const db = useDrizzle();
@@ -14,7 +14,6 @@ export default NuxtAuthHandler({
     updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
-    // @ts-expect-error - Type mismatch between @auth/core and next-auth
     CredentialsProvider({
       name: 'Credentials',
       credentials: {

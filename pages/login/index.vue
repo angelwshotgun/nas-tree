@@ -129,8 +129,8 @@ definePageMeta({
   auth: { unauthenticatedOnly: true, navigateAuthenticatedTo: '/nas' },
 });
 
-const email = ref('zmalqp123@gmail.com');
-const password = ref('zmalqp123');
+const email = ref('');
+const password = ref('');
 const errorMessage = ref('');
 const { signIn, status } = useAuth();
 const router = useRouter();

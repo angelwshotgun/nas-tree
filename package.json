@@ -25,7 +25,7 @@
     "chart.js": "^4.4.8",
     "drizzle-orm": "^0.42.0",
     "gsap": "^3.12.7",
-    "next-auth": "4.21.1",
+    "next-auth": "^5.0.0-beta.25",
     "nuxt": "^3.16.1",
     "nuxthub": "0.9.0",
     "primeicons": "^7.0.0",
@@ -38,7 +38,7 @@
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "devDependencies": {
-    "@sidebase/nuxt-auth": "^0.10.1",
+    "@sidebase/nuxt-auth": "^1.0.0-alpha.0",
     "@types/bcrypt": "^5.0.2",
     "@unocss/nuxt": "^66.1.0-beta.7",
     "drizzle-kit": "^0.31.0",
