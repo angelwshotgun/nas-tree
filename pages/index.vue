@@ -14,42 +14,38 @@
 
       <!-- Menu Items -->
       <div class="flex flex-col gap-3 w-[80%] mx-auto">
-        <Button
-          :unstyled="true"
-          label="Quán ăn"
-          class="p-3 text-red-500 bg-amber-100 border-2 border-slate-800 rounded-lg text-3xl"
-          @click="navigateTo('/du-lich')"
-        />
-
-        <Button
-          :unstyled="true"
-          label="Địa điểm du lịch"
-          class="p-3 text-red-500 bg-amber-100 border-2 border-slate-800 rounded-lg text-3xl"
-          @click="navigateTo('/du-lich')"
-        />
-
-        <Button
-          :unstyled="true"
-          label="Tour"
-          class="p-3 text-red-500 bg-amber-100 border-2 border-slate-800 rounded-lg text-3xl"
-          @click="navigateTo('/du-lich')"
-        />
-
-        <Button
-          :unstyled="true"
-          label="ABC XYZ"
-          class="p-3 text-red-500 bg-amber-100 border-2 border-slate-800 rounded-lg text-3xl"
-          @click="navigateTo('/du-lich')"
-        />
+        <template v-for="item in thuMucList" :key="item.id">
+          <Button
+            :unstyled="true"
+            :label="item.ten_thumuc"
+            class="p-3 text-red-500 bg-amber-100 border-2 border-slate-800 rounded-lg text-3xl"
+            @click="navigateTo(`/${item.id}`)"
+          />
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { ThuMucModel } from '~/models/thu-muc.model';
+import { ThuMucService } from '~/services/thu-muc.service';
+
 definePageMeta({
-  layout: "main",
+  layout: 'main',
   auth: false,
 });
-</script>
 
+const { data: thuMucList } = useNuxtData<ThuMucModel[]>('thuMucList');
+
+onMounted(async () => {
+  if (thuMucList.value) return;
+  try {
+    const response = await ThuMucService.GetThuMuc();
+    thuMucList.value = response;
+    useNuxtData<ThuMucModel[]>('thuMucList').data.value = response;
+  } catch (error) {
+    console.error('Error fetching thu muc:', error);
+  }
+});
+</script>

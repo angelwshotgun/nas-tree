@@ -65,4 +65,5 @@ function isOutsideClicked(event) {
         <div class="layout-mask animate-fadein"></div>
     </div>
     <Toast />
+    <ConfirmPopup />
 </template>

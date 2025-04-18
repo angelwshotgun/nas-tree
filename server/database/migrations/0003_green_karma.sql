@@ -1,0 +1,1 @@
+ALTER TABLE `thumuc` ADD `thu_tu` integer DEFAULT 0 NOT NULL;

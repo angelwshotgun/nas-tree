@@ -2,17 +2,38 @@
 // import { FilterMatchMode } from '@primevue/core/api';
 import type { ThuMucModel } from '~/models/thu-muc.model';
 import { ThuMucService } from '~/services/thu-muc.service';
+import type { BaiVietModel } from '~/models/bai-viet.model';
+import { BaiVietService } from '~/services/bai-viet.service';
 
 const isOpenModal = ref<boolean>(false);
 const toast = useToast();
 const confirm = useConfirm();
 const keyWords = ref('');
 
-const thuMucList = ref();
 const thuMucSelect = ref();
 
-ThuMucService.GetThuMuc().then((response) => {
-  thuMucList.value = response;
+const { data: thuMucList } = useNuxtData('thuMucList');
+const { data: baiVietList } = useNuxtData('baiVietList');
+
+onMounted(async () => {
+  if (!thuMucList.value) {
+    try {
+      const response = await ThuMucService.GetThuMuc();
+      thuMucList.value = response;
+      useNuxtData('thuMucList').data.value = response;
+    } catch (error) {
+      console.error('Error fetching thu muc:', error);
+    }
+  }
+  if (!baiVietList.value) {
+    try {
+      const response = await BaiVietService.GetBaiViet();
+      baiVietList.value = response;
+      useNuxtData('baiVietList').data.value = response;
+    } catch (error) {
+      console.error('Error fetching bai viet:', error);
+    }
+  }
 });
 
 const onReloadDataTable = async () => {
@@ -77,7 +98,7 @@ const onHandleDelete = (rowData: ThuMucModel) => {
 <template>
   <div class="card">
     <DataTable
-      :value="thuMucList"
+      :value="baiVietList"
       scrollable
       paginator
       :rows="10"
@@ -137,10 +158,13 @@ const onHandleDelete = (rowData: ThuMucModel) => {
         </template>
       </Column>
     </DataTable>
-    <DialogThuMuc
+    <DialogBaiViet
       v-model:is-visible="isOpenModal"
-      :thu-muc="thuMucSelect"
-      @hide-modal="isOpenModal = false; thuMucSelect = null"
+      :thu-muc-list="thuMucList"
+      @hide-modal="
+        isOpenModal = false;
+        thuMucSelect = null;
+      "
       @reload-data-table="onReloadDataTable"
     />
   </div>

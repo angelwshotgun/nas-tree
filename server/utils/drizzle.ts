@@ -10,7 +10,8 @@ export function useDrizzle() {
 }
 
 export type User = typeof schema.users.$inferSelect
-export type Todos = typeof schema.todos.$inferSelect;;
 export type Accounts = typeof schema.accounts.$inferSelect;
 export type verificationTokens = typeof schema.verificationTokens.$inferSelect;
 export type Sessions = typeof schema.sessions.$inferSelect;
+export type ThuMuc = typeof schema.thumuc.$inferSelect;
+export type BaiViet = typeof schema.baiviet.$inferSelect;

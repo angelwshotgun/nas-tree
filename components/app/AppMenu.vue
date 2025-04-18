@@ -2,7 +2,10 @@
 const model = ref([
   {
     label: 'Home',
-    items: [{ label: 'Thư mục', icon: 'pi pi-fw pi-home', to: '/nas/thu-muc' }],
+    items: [
+      { label: 'Thư mục', icon: 'pi pi-fw pi-folder', to: '/nas/thu-muc' },
+      { label: 'Bài viết', icon: 'pi pi-fw pi-file-edit', to: '/nas/bai-viet' },
+    ],
   },
 ]);
 </script>
