@@ -41,7 +41,7 @@ const { data: thuMucList } = useNuxtData<ThuMucModel[]>('thuMucList');
 onMounted(async () => {
   if (thuMucList.value) return;
   try {
-    const response = await ThuMucService.GetThuMuc();
+    const response = await ThuMucService.GetThuMucPublic();
     thuMucList.value = response;
     useNuxtData<ThuMucModel[]>('thuMucList').data.value = response;
   } catch (error) {

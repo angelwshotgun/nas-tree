@@ -8,17 +8,26 @@ const toast = useToast();
 const confirm = useConfirm();
 const keyWords = ref('');
 
-const thuMucList = ref();
 const thuMucSelect = ref();
 
-ThuMucService.GetThuMuc().then((response) => {
-  thuMucList.value = response;
+const { data: thuMucList } = useNuxtData<ThuMucModel[]>('thuMucList');
+
+onMounted(async () => {
+  if (thuMucList.value) return;
+  try {
+    const response = await ThuMucService.GetThuMuc();
+    thuMucList.value = response;
+    useNuxtData<ThuMucModel[]>('thuMucList').data.value = response;
+  } catch (error) {
+    console.error('Error fetching thu muc:', error);
+  }
 });
 
 const onReloadDataTable = async () => {
   await ThuMucService.GetThuMuc().then((response) => {
     thuMucList.value = response;
-  });
+    useNuxtData<ThuMucModel[]>('thuMucList').data.value = response;
+    });
 };
 
 const onHandleEdit = async (rowData: ThuMucModel) => {
@@ -111,7 +120,7 @@ const onHandleDelete = (rowData: ThuMucModel) => {
         </div>
       </template>
       <Column field="ten_thumuc" header="Tên thư mục" style="min-width: 5rem" />
-      <Column field="order_id" header="Thứ tự" style="min-width: 5rem" />
+      <Column field="thu_tu" header="Thứ tự" style="min-width: 5rem" />
       <Column>
         <template #header>
           <th>Thao tác</th>

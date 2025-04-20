@@ -3,10 +3,8 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
 
-const db = useDrizzle();
-
 export default NuxtAuthHandler({
-  adapter: DrizzleAdapter(db) as any,
+  adapter: DrizzleAdapter(useDrizzle()),
   secret: process.env.AUTH_SECRET || "your-secret-here",
   session: {
     strategy: "jwt",
@@ -20,22 +18,21 @@ export default NuxtAuthHandler({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, request) {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        const [user] = await db
+        const user = await useDrizzle()
           .select()
           .from(tables.users)
-          .where(eq(tables.users.email, credentials.email))
-          .limit(1);
+          .where(eq(tables.users.email, credentials.email as string))
+          .get();
 
         if (!user || !user.password) {
           return null;
         }
 
-        // In a real app, you should use proper password hashing like bcrypt
         if (credentials.password !== user.password) {
           return null;
         }
@@ -49,17 +46,40 @@ export default NuxtAuthHandler({
     }) as any,
   ],
   callbacks: {
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.sub;
-      }
+    async signIn({ user, account, profile, email, credentials }) {
+      return true;
+    },
+    /* on redirect to another url */
+    async redirect({ url, baseUrl }) {
+      return baseUrl;
+    },
+    /* on session retrival */
+    async session({ session, user }) {
       return session;
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.sub = user.id;
-      }
+    /* on JWT token creation or mutation */
+    async jwt({ token, user, account, profile, isNewUser }) {
       return token;
+    },
+  },
+  events: {
+    async signIn(message) {
+      console.log("sign in");
+    },
+    async signOut(message) {
+      console.log("sign out");
+    },
+    async createUser(message) {
+      console.log("create user");
+    },
+    async updateUser(message) {
+      console.log("update user");
+    },
+    async linkAccount(message) {
+      /* account (e.g. GitHub) linked to a user */
+    },
+    async session(message) {
+      // console.log('session', message);
     },
   },
   pages: {

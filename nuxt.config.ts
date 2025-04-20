@@ -19,14 +19,6 @@ export default defineNuxtConfig({
     remote: true,
     database: true,
   },
-  runtimeConfig: {
-    public: {
-      supabaseUrl: process.env.SUPABASE_URL,
-    },
-    supabaseJwtSecret: process.env.SUPABASE_JWT_SECRET,
-    databaseUrl: process.env.POSTGRES_PRISMA_URL,
-    postgresUser: process.env.POSTGRES_USER,
-  },
   googleFonts: {
     families: {
       'EB Garamond': true,

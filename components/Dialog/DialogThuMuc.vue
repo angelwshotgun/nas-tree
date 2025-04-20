@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { yupResolver } from '@primevue/forms/resolvers/yup';
-import * as yup from 'yup';
-import type { FormSubmitEvent, FormInstance } from '@primevue/forms/form';
-import type { ThuMucModel } from '~/models/thu-muc.model';
-import { ThuMucService } from '~/services/thu-muc.service';
+import { yupResolver } from "@primevue/forms/resolvers/yup";
+import * as yup from "yup";
+import type { FormSubmitEvent, FormInstance } from "@primevue/forms/form";
+import type { ThuMucModel } from "~/models/thu-muc.model";
+import { ThuMucService } from "~/services/thu-muc.service";
 
 const isMounted = ref(false);
 const closeEscapeKeyModalInfo = ref<boolean>(true);
 const confirm = useConfirm();
-const ConfirmDialog = useConfirmDialog();
 const toast = useToast();
 const thuMucSelect = ref();
 
@@ -37,9 +36,15 @@ const resolver = ref(
       ten_thumuc: yup
         .string()
         .nullable()
-        .required('Vui lòng nhập tên thư mục!')
-        .max(100, 'không được vượt quá 100 ký tự!')
-        .label('tên thư mục'),
+        .required("Vui lòng nhập tên thư mục!")
+        .max(100, "không được vượt quá 100 ký tự!")
+        .label("tên thư mục"),
+      thu_tu: yup
+        .number()
+        .nullable()
+        .required("Vui lòng nhập thứ tự!")
+        .typeError("Vui lòng nhập một số hợp lệ!")
+        .label("thứ tự"),
     })
   )
 );
@@ -47,11 +52,13 @@ const resolver = ref(
 const initialValues = ref<{
   id: number;
   ten_thumuc: string | null;
+  thu_tu: number | null;
   createdAt: number | null;
   updatedAt: number | null;
 }>({
   id: 0,
-  ten_thumuc: '',
+  ten_thumuc: "",
+  thu_tu: null,
   createdAt: null,
   updatedAt: null,
 });
@@ -61,21 +68,22 @@ const onSubmit = (e: FormSubmitEvent) => {
     const ThuMucDTO: ThuMucModel = {
       id: initialValues.value.id,
       ten_thumuc: e.values.ten_thumuc,
+      thu_tu: e.values.thu_tu,
     };
     confirm.require({
       message: `${
         ThuMucDTO.id != null && ThuMucDTO.id > 0
-          ? 'Bạn có chắc muốn cập nhật thông tin này?'
-          : 'Bạn có chắc muốn thêm thông tin này?'
+          ? "Bạn có chắc muốn cập nhật thông tin này?"
+          : "Bạn có chắc muốn thêm thông tin này?"
       }`,
-      icon: 'pi pi-question-circle',
+      icon: "pi pi-question-circle",
       rejectProps: {
-        label: 'Hủy',
-        severity: 'secondary',
+        label: "Hủy",
+        severity: "secondary",
         outlined: true,
       },
       acceptProps: {
-        label: 'Xác nhận',
+        label: "Xác nhận",
       },
       accept: () => {
         if (ThuMucDTO.id != null && ThuMucDTO.id > 0) {
@@ -83,19 +91,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: 'success',
-                  summary: 'Thành công',
-                  detail: 'Cập nhật thông tin thành công!',
+                  severity: "success",
+                  summary: "Thành công",
+                  detail: "Cập nhật thông tin thành công!",
                   life: 3000,
                 });
                 e.reset();
-                emit('reloadDataTable');
+                emit("reloadDataTable");
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: 'error',
-                  summary: 'Thất bại',
-                  detail: 'Cập nhật thông tin không thành công!',
+                  severity: "error",
+                  summary: "Thất bại",
+                  detail: "Cập nhật thông tin không thành công!",
                   life: 3000,
                 });
                 e.reset();
@@ -104,9 +112,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: 'error',
-                summary: 'Lỗi',
-                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
+                severity: "error",
+                summary: "Lỗi",
+                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
                 life: 3000,
               });
               e.reset();
@@ -117,19 +125,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: 'success',
-                  summary: 'Thành công',
-                  detail: 'Thêm mới thông tin thành công!',
+                  severity: "success",
+                  summary: "Thành công",
+                  detail: "Thêm mới thông tin thành công!",
                   life: 3000,
                 });
                 e.reset();
-                emit('reloadDataTable');
+                emit("reloadDataTable");
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: 'error',
-                  summary: 'Thất bại',
-                  detail: 'Thêm mới thông tin không thành công!',
+                  severity: "error",
+                  summary: "Thất bại",
+                  detail: "Thêm mới thông tin không thành công!",
                   life: 3000,
                 });
                 e.reset();
@@ -138,9 +146,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: 'error',
-                summary: 'Lỗi',
-                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
+                severity: "error",
+                summary: "Lỗi",
+                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
                 life: 3000,
               });
               e.reset();
@@ -156,7 +164,8 @@ const onSubmit = (e: FormSubmitEvent) => {
 watchEffect(() => {
   if (props.thuMuc?.id != undefined) {
     initialValues.value.id = props.thuMuc?.id;
-    initialValues.value.ten_thumuc = props.thuMuc?.ten_thumuc ?? '';
+    initialValues.value.ten_thumuc = props.thuMuc?.ten_thumuc ?? "";
+    initialValues.value.thu_tu = props.thuMuc?.thu_tu ?? null;
     initialValues.value.createdAt = props.thuMuc?.createdAt ?? null;
     initialValues.value.updatedAt = props.thuMuc?.updatedAt ?? null;
   }
@@ -176,16 +185,17 @@ onMounted(async () => {
   isMounted.value = true;
 });
 
-const emit = defineEmits(['hideModal', 'reloadDataTable']);
+const emit = defineEmits(["hideModal", "reloadDataTable"]);
 
 const handleHideModal = () => {
   initialValues.value = {
     id: 0,
-    ten_thumuc: '',
+    ten_thumuc: "",
+    thu_tu: null,
     createdAt: null,
     updatedAt: null,
   };
-  emit('hideModal');
+  emit("hideModal");
 };
 </script>
 
@@ -211,7 +221,7 @@ const handleHideModal = () => {
             :resolver="resolver"
             @submit="onSubmit"
           >
-            <div class="gap-4">
+            <div class="gap-4 flex flex-col">
               <div class="min-w-40">
                 <label for="ten_thumuc" class="block font-bold mb-3 required"
                   >Tên thư mục</label
@@ -228,6 +238,24 @@ const handleHideModal = () => {
                   variant="simple"
                 >
                   {{ $form.ten_thumuc.error.message }}
+                </Message>
+              </div>
+              <div class="min-w-40">
+                <label for="ten_thumuc" class="block font-bold mb-3 required"
+                  >Nhập thứ tự</label
+                >
+                <InputText
+                  id="thu_tu"
+                  name="thu_tu"
+                  fluid
+                  placeholder="Nhập thứ tự"
+                />
+                <Message
+                  v-if="$form.thu_tu?.invalid"
+                  severity="error"
+                  variant="simple"
+                >
+                  {{ $form.thu_tu.error.message }}
                 </Message>
               </div>
             </div>

@@ -1,6 +1,16 @@
 import type { ThuMucModel } from '~/models/thu-muc.model';
 class _ThuMucService {
   async GetThuMuc() {
+    const response = await $api<ThuMucModel[]>('/api/thu-muc', {
+      method: 'GET',
+    });
+    if (response) {
+      return response;
+    }
+    return [];
+  }
+  
+  async GetThuMucPublic() {
     const response = await $api<ThuMucModel[]>('/api/public/thu-muc', {
       method: 'GET',
     });

@@ -18,9 +18,9 @@
 </template>
 
 <script setup>
-definePageMeta({
-  layout: "none",
-});
+// definePageMeta({
+//   layout: "none",
+// });
 
 const email = ref("");
 const password = ref("");
