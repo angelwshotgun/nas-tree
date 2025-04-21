@@ -142,14 +142,6 @@ const items = [
           </button>
           <div class="relative">
             <button
-              v-styleclass="{
-                selector: '@next',
-                enterFromClass: 'hidden',
-                enterActiveClass: 'animate-scalein',
-                leaveToClass: 'hidden',
-                leaveActiveClass: 'animate-fadeout',
-                hideOnOutsideClick: true,
-              }"
               type="button"
               class="layout-topbar-action"
               @click="userVisible = !userVisible"

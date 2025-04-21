@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { yupResolver } from "@primevue/forms/resolvers/yup";
-import * as yup from "yup";
-import type { FormSubmitEvent, FormInstance } from "@primevue/forms/form";
-import type { ThuMucModel } from "~/models/thu-muc.model";
-import { ThuMucService } from "~/services/thu-muc.service";
+import { yupResolver } from '@primevue/forms/resolvers/yup';
+import * as yup from 'yup';
+import type { FormSubmitEvent, FormInstance } from '@primevue/forms/form';
+import type { ThuMucModel } from '~/models/thu-muc.model';
+import { ThuMucService } from '~/services/thu-muc.service';
+import type { BaiVietModel } from '~/models/bai-viet.model';
+import { BaiVietService } from '~/services/bai-viet.service';
 
 const isMounted = ref(false);
 const closeEscapeKeyModalInfo = ref<boolean>(true);
@@ -20,7 +22,7 @@ const props = defineProps({
     type: Object as PropType<ThuMucModel[]>,
   },
   baiViet: {
-    type: Object as PropType<ThuMucModel>,
+    type: Object as PropType<BaiVietModel>,
   },
 });
 
@@ -37,68 +39,73 @@ const form = ref<FormInstance | null>(null);
 const resolver = ref(
   yupResolver(
     yup.object().shape({
-      ten_thumuc: yup
-        .string()
-        .nullable()
-        .required("Vui lòng nhập tên thư mục!")
-        .max(100, "không được vượt quá 100 ký tự!")
-        .label("tên thư mục"),
     })
   )
 );
 
 const initialValues = ref<{
   id: number;
-  ten_thumuc: string | null;
+  tieu_de: string | null;
+  noi_dung: string | null;
+  anh: string | null;
+  vi_tri: string | null;
+  thumucId: number | null;
   createdAt: number | null;
   updatedAt: number | null;
 }>({
   id: 0,
-  ten_thumuc: "",
+  tieu_de: '',
+  noi_dung: '',
+  anh: '',
+  vi_tri: '',
+  thumucId: null;
   createdAt: null,
   updatedAt: null,
 });
 
 const onSubmit = (e: FormSubmitEvent) => {
   if (e.valid) {
-    const ThuMucDTO: ThuMucModel = {
-      id: initialValues.value.id,
-      ten_thumuc: e.values.ten_thumuc,
-    };
+    const BaiVietDTO = new FormData();
+    BaiVietDTO.append('id', initialValues.value.id.toString());
+    BaiVietDTO.append('tieu_de', e.values.tieu_de);
+    BaiVietDTO.append('noi_dung', e.values.noi_dung);
+    BaiVietDTO.append('vi_tri', e.values.vi_tri);
+    BaiVietDTO.append('thumucId', e.values.thumucId);
+    BaiVietDTO.append('image', fileUpload.value?.files);
     confirm.require({
       message: `${
-        ThuMucDTO.id != null && ThuMucDTO.id > 0
-          ? "Bạn có chắc muốn cập nhật thông tin này?"
-          : "Bạn có chắc muốn thêm thông tin này?"
+        BaiVietDTO.get('id') != null && parseInt(BaiVietDTO.get('id') as string) > 0
+          ? 'Bạn có chắc muốn cập nhật thông tin này?'
+          : 'Bạn có chắc muốn thêm thông tin này?'
       }`,
-      icon: "pi pi-question-circle",
+      icon: 'pi pi-question-circle',
       rejectProps: {
-        label: "Hủy",
-        severity: "secondary",
+        label: 'Hủy',
+        severity: 'secondary',
         outlined: true,
       },
       acceptProps: {
-        label: "Xác nhận",
+        label: 'Xác nhận',
       },
       accept: () => {
-        if (ThuMucDTO.id != null && ThuMucDTO.id > 0) {
-          ThuMucService.Update(ThuMucDTO)
+        if (BaiVietDTO.get('id') != null && parseInt(BaiVietDTO.get('id') as string) > 0) {
+          BaiVietService.Update(BaiVietDTO)
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: "success",
-                  summary: "Thành công",
-                  detail: "Cập nhật thông tin thành công!",
+                  severity: 'success',
+                  summary: 'Thành công',
+                  detail: 'Cập nhật thông tin thành công!',
                   life: 3000,
                 });
                 e.reset();
-                emit("reloadDataTable");
+                emit('reloadDataTable');
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: "error",
-                  summary: "Thất bại",
-                  detail: "Cập nhật thông tin không thành công!",
+                  severity: 'error',
+                  summary: 'Thất bại',
+                  detail: 'Cập nhật thông tin không thành công!',
                   life: 3000,
                 });
                 e.reset();
@@ -107,32 +114,32 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: "error",
-                summary: "Lỗi",
-                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
+                severity: 'error',
+                summary: 'Lỗi',
+                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
                 life: 3000,
               });
               e.reset();
               handleHideModal();
             });
         } else {
-          ThuMucService.Insert(ThuMucDTO)
+          BaiVietService.Insert(BaiVietDTO)
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: "success",
-                  summary: "Thành công",
-                  detail: "Thêm mới thông tin thành công!",
+                  severity: 'success',
+                  summary: 'Thành công',
+                  detail: 'Thêm mới thông tin thành công!',
                   life: 3000,
                 });
                 e.reset();
-                emit("reloadDataTable");
+                emit('reloadDataTable');
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: "error",
-                  summary: "Thất bại",
-                  detail: "Thêm mới thông tin không thành công!",
+                  severity: 'error',
+                  summary: 'Thất bại',
+                  detail: 'Thêm mới thông tin không thành công!',
                   life: 3000,
                 });
                 e.reset();
@@ -141,9 +148,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: "error",
-                summary: "Lỗi",
-                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
+                severity: 'error',
+                summary: 'Lỗi',
+                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
                 life: 3000,
               });
               e.reset();
@@ -159,7 +166,7 @@ const onSubmit = (e: FormSubmitEvent) => {
 watchEffect(() => {
   if (props.baiViet?.id != undefined) {
     initialValues.value.id = props.baiViet?.id;
-    initialValues.value.ten_thumuc = props.baiViet?.ten_thumuc ?? "";
+    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? '';
     initialValues.value.createdAt = props.baiViet?.createdAt ?? null;
     initialValues.value.updatedAt = props.baiViet?.updatedAt ?? null;
   }
@@ -179,16 +186,56 @@ onMounted(async () => {
   isMounted.value = true;
 });
 
-const emit = defineEmits(["hideModal", "reloadDataTable"]);
+const emit = defineEmits(['hideModal', 'reloadDataTable']);
 
 const handleHideModal = () => {
   initialValues.value = {
     id: 0,
-    ten_thumuc: "",
+    tieu_de: '',
+    noi_dung: '',
+    anh: '',
+    vi_tri: '',
+    thumucId: null,
     createdAt: null,
     updatedAt: null,
   };
-  emit("hideModal");
+  emit('hideModal');
+};
+
+const url = ref();
+const fileUpload = ref();
+const isLoading = ref(false);
+const uploadStatus = ref<'waiting' | 'success'>('waiting');
+
+const onFileChange = async () => {
+  uploadStatus.value = 'waiting';
+  isLoading.value = true;
+  const files = fileUpload.value?.files;
+  console.log(fileUpload.value);
+  if (files && files.length > 0) {
+    isLoading.value = false;
+    uploadStatus.value = 'success';
+  }
+};
+
+const formatSize = (bytes: number) => {
+  const k = 1024;
+  const dm = 3;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  if (bytes === 0) {
+    return `0 ${sizes[0]}`;
+  }
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+
+  return `${formattedSize} ${sizes[i]}`;
+};
+
+const onRemoveFile = (index: number) => {
+  if (fileUpload.value.uploadedFiles.length > 0) {
+    fileUpload.value.uploadedFiles.splice(index, 1);
+  }
 };
 </script>
 
@@ -216,58 +263,169 @@ const handleHideModal = () => {
           >
             <div class="gap-4 flex flex-col">
               <div class="min-w-40">
-                <label for="ten_thumuc" class="block font-bold mb-3 required"
+                <label for="tieu_de" class="block font-bold mb-3 required"
                   >Tiêu đề</label
                 >
                 <InputText
-                  id="ten_thumuc"
-                  name="ten_thumuc"
+                  id="tieu_de"
+                  name="tieu_de"
                   fluid
-                  placeholder="Nhập tên thư mục"
+                  placeholder="Nhập tên tiêu đề"
                 />
                 <Message
-                  v-if="$form.ten_thumuc?.invalid"
+                  v-if="$form.tieu_de?.invalid"
                   severity="error"
                   variant="simple"
                 >
-                  {{ $form.ten_thumuc.error.message }}
+                  {{ $form.tieu_de.error.message }}
                 </Message>
               </div>
               <div class="min-w-40">
-                <label for="ten_thumuc" class="block font-bold mb-3 required"
+                <label for="tieu_de" class="block font-bold mb-3 required"
+                  >Tiêu đề</label
+                >
+                <InputText
+                  id="tieu_de"
+                  name="tieu_de"
+                  fluid
+                  placeholder="Nhập tên tiêu đề"
+                />
+                <Message
+                  v-if="$form.tieu_de?.invalid"
+                  severity="error"
+                  variant="simple"
+                >
+                  {{ $form.tieu_de.error.message }}
+                </Message>
+              </div>
+              <div class="min-w-40">
+                <label for="noi_dung" class="block font-bold mb-3 required"
                   >Nội dung</label
                 >
                 <Editor
-                  id="ten_thumuc"
-                  name="ten_thumuc"
+                  id="noi_dung"
+                  name="noi_dung"
                   fluid
-                  placeholder="Nhập tên thư mục"
+                  placeholder="Nhập tên nội dung"
                 />
                 <Message
-                  v-if="$form.ten_thumuc?.invalid"
+                  v-if="$form.noi_dung?.invalid"
                   severity="error"
                   variant="simple"
                 >
-                  {{ $form.ten_thumuc.error.message }}
+                  {{ $form.noi_dung.error.message }}
                 </Message>
               </div>
               <div class="min-w-40">
-                <label for="ten_thumuc" class="block font-bold mb-3 required"
+                <FileUpload
+                  ref="fileUpload"
+                  v-model="url"
+                  :multiple="true"
+                  :show-upload-button="false"
+                  :max-file-size="104857600"
+                  invalid-file-size-message="Kích thước file quá lớn, vui lòng chọn file khác!"
+                  accept="image/*"
+                  choose-label="Chọn file"
+                  upload-label="Tải lên"
+                  cancel-label="Hủy bỏ"
+                  @change="onFileChange"
+                >
+                  <template
+                    #content="{ files, uploadedFiles, removeFileCallback }"
+                  >
+                    <div
+                      v-if="files.length > 0"
+                      class="flex flex-col gap-4 mb-4"
+                    >
+                      <div
+                        v-for="(file, index) of files"
+                        :key="file.name + file.type + file.size"
+                        class="p-4 rounded-border flex flex-wrap border border-surface gap-4 items-center w-full"
+                      >
+                        <div class="flex flex-col gap-2">
+                          <span
+                            class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
+                            >{{ file.name }}</span
+                          >
+                          <div>{{ formatSize(file.size) }}</div>
+                        </div>
+                        <Badge
+                          :value="
+                            uploadStatus === 'waiting'
+                              ? 'Chờ đợi'
+                              : 'Thành công'
+                          "
+                          :severity="
+                            uploadStatus === 'waiting' ? 'warn' : 'success'
+                          "
+                        />
+                        <div class="ml-auto">
+                          <Button
+                            icon="pi pi-times"
+                            outlined
+                            rounded
+                            severity="danger"
+                            @click="removeFileCallback(index)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      v-if="uploadedFiles.length > 0"
+                      class="flex flex-col gap-4"
+                    >
+                      <div
+                        v-for="(file, index) of uploadedFiles"
+                        :key="file.name + file.type + file.size"
+                        class="p-4 rounded-border flex flex-wrap border border-surface gap-4 items-center w-full"
+                      >
+                        <div class="flex flex-col gap-2">
+                          <span
+                            class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
+                            >{{ file.name }}</span
+                          >
+                          <div>{{ formatSize(file.size) }}</div>
+                        </div>
+                        <Badge value="Thành công" severity="success" />
+                        <div class="ml-auto">
+                          <Button
+                            icon="pi pi-times"
+                            outlined
+                            rounded
+                            severity="danger"
+                            @click="onRemoveFile(index)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                  <template #empty>
+                    <div class="flex items-center justify-center flex-col">
+                      <i
+                        class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
+                      />
+                      <p class="mt-6 mb-0">Kéo và thả các file ảnh</p>
+                    </div>
+                  </template>
+                </FileUpload>
+              </div>
+              <div class="min-w-40">
+                <label for="vi_tri" class="block font-bold mb-3 required"
                   >Link địa chỉ</label
                 >
                 <InputText
-                  id="ten_thumuc"
-                  name="ten_thumuc"
+                  id="vi_tri"
+                  name="vi_tri"
                   fluid
-                  placeholder="Nhập tên thư mục"
+                  placeholder="Nhập link địa chỉ"
                   class="mb-3"
                 />
                 <Message
-                  v-if="$form.ten_thumuc?.invalid"
+                  v-if="$form.vi_tri?.invalid"
                   severity="error"
                   variant="simple"
                 >
-                  {{ $form.ten_thumuc.error.message }}
+                  {{ $form.vi_tri.error.message }}
                 </Message>
                 <iframe
                   width="100%"
