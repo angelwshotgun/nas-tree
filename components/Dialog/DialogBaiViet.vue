@@ -6,6 +6,8 @@ import type { ThuMucModel } from '~/models/thu-muc.model';
 import { ThuMucService } from '~/services/thu-muc.service';
 import type { BaiVietModel } from '~/models/bai-viet.model';
 import { BaiVietService } from '~/services/bai-viet.service';
+import { ref as firebaseRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '~/plugins/firebase'; // Ensure you have this file set up with Firebase configuration
 
 const isMounted = ref(false);
 const closeEscapeKeyModalInfo = ref<boolean>(true);
@@ -13,6 +15,8 @@ const confirm = useConfirm();
 const ConfirmDialog = useConfirmDialog();
 const toast = useToast();
 const thuMucSelect = ref();
+const uploadedImageUrls = ref<string[]>([]);
+const isUploading = ref(false);
 
 const props = defineProps({
   isVisible: {
@@ -35,13 +39,21 @@ const internalVisible = computed({
   },
 });
 
+const { data: thuMucList } = useNuxtData('thuMucList');
+
+onMounted(async () => {
+  if (thuMucList.value) return;
+  try {
+    const response = await ThuMucService.GetThuMuc();
+    thuMucList.value = response;
+    useNuxtData('thuMucList').data.value = response;
+  } catch (error) {
+    console.error('Error fetching thu muc:', error);
+  }
+});
+
 const form = ref<FormInstance | null>(null);
-const resolver = ref(
-  yupResolver(
-    yup.object().shape({
-    })
-  )
-);
+const resolver = ref(yupResolver(yup.object().shape({})));
 
 const initialValues = ref<{
   id: number;
@@ -58,23 +70,24 @@ const initialValues = ref<{
   noi_dung: '',
   anh: '',
   vi_tri: '',
-  thumucId: null;
+  thumucId: null,
   createdAt: null,
   updatedAt: null,
 });
 
 const onSubmit = (e: FormSubmitEvent) => {
   if (e.valid) {
-    const BaiVietDTO = new FormData();
-    BaiVietDTO.append('id', initialValues.value.id.toString());
-    BaiVietDTO.append('tieu_de', e.values.tieu_de);
-    BaiVietDTO.append('noi_dung', e.values.noi_dung);
-    BaiVietDTO.append('vi_tri', e.values.vi_tri);
-    BaiVietDTO.append('thumucId', e.values.thumucId);
-    BaiVietDTO.append('image', fileUpload.value?.files);
+    const BaiVietDTO: BaiVietModel = {
+      id: initialValues.value.id,
+      tieu_de: e.values.tieu_de,
+      noi_dung: e.values.noi_dung,
+      vi_tri: e.values.vi_tri,
+      thumucId: e.values.thumucId,
+      anh: JSON.stringify(uploadedImageUrls.value), // Convert array to JSON string
+    };
     confirm.require({
       message: `${
-        BaiVietDTO.get('id') != null && parseInt(BaiVietDTO.get('id') as string) > 0
+        BaiVietDTO.id != null && BaiVietDTO.id > 0
           ? 'Bạn có chắc muốn cập nhật thông tin này?'
           : 'Bạn có chắc muốn thêm thông tin này?'
       }`,
@@ -88,7 +101,7 @@ const onSubmit = (e: FormSubmitEvent) => {
         label: 'Xác nhận',
       },
       accept: () => {
-        if (BaiVietDTO.get('id') != null && parseInt(BaiVietDTO.get('id') as string) > 0) {
+        if (BaiVietDTO.id != null && BaiVietDTO.id > 0) {
           BaiVietService.Update(BaiVietDTO)
             .then((response) => {
               if (response) {
@@ -169,6 +182,16 @@ watchEffect(() => {
     initialValues.value.tieu_de = props.baiViet?.tieu_de ?? '';
     initialValues.value.createdAt = props.baiViet?.createdAt ?? null;
     initialValues.value.updatedAt = props.baiViet?.updatedAt ?? null;
+    
+    // Parse the JSON string back to array if it exists
+    if (props.baiViet?.anh) {
+      try {
+        uploadedImageUrls.value = JSON.parse(props.baiViet.anh);
+      } catch (error) {
+        console.error('Error parsing image URLs:', error);
+        uploadedImageUrls.value = [];
+      }
+    }
   }
 });
 
@@ -199,25 +222,88 @@ const handleHideModal = () => {
     createdAt: null,
     updatedAt: null,
   };
+  uploadedImageUrls.value = [];
   emit('hideModal');
 };
 
 const url = ref();
 const fileUpload = ref();
 const isLoading = ref(false);
-const uploadStatus = ref<'waiting' | 'success'>('waiting');
+const uploadStatus = ref<'waiting' | 'uploading' | 'success' | 'error'>('waiting');
+const uploadProgress = ref<{ [key: string]: number }>({});
 
-const onFileChange = async () => {
-  uploadStatus.value = 'waiting';
-  isLoading.value = true;
-  const files = fileUpload.value?.files;
-  console.log(fileUpload.value);
-  if (files && files.length > 0) {
-    isLoading.value = false;
-    uploadStatus.value = 'success';
+// Function to upload file to Firebase
+const uploadToFirebase = async (file: File): Promise<string> => {
+  try {
+    const timestamp = new Date().getTime();
+    const storageRef = firebaseRef(storage, `images/${timestamp}_${file.name}`);
+    
+    // Upload file
+    const snapshot = await uploadBytes(storageRef, file);
+    
+    // Get download URL
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    throw error;
   }
 };
 
+const onFileChange = async () => {
+  uploadStatus.value = 'uploading';
+  isLoading.value = true;
+  isUploading.value = true;
+  
+  const files = fileUpload.value?.files;
+  
+  if (files && files.length > 0) {
+    try {
+      const uploadPromises = Array.from(files).map(async (file: unknown) => {
+        if (!(file instanceof File)) {
+          throw new Error('Invalid file type');
+        }
+        
+        // Set initial progress for this file
+        uploadProgress.value[file.name] = 0;
+        
+        // Upload and get URL
+        const url = await uploadToFirebase(file);
+        
+        // Update progress
+        uploadProgress.value[file.name] = 100;
+        
+        return url;
+      });
+      
+      // Wait for all uploads to complete
+      const urls = await Promise.all(uploadPromises);
+      
+      // Add new URLs to the existing array
+      uploadedImageUrls.value = [...uploadedImageUrls.value, ...urls];
+      
+      uploadStatus.value = 'success';
+      toast.add({
+        severity: 'success',
+        summary: 'Thành công',
+        detail: 'Tải lên ảnh thành công!',
+        life: 3000,
+      });
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      uploadStatus.value = 'error';
+      toast.add({
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Tải lên ảnh không thành công!',
+        life: 3000,
+      });
+    } finally {
+      isLoading.value = false;
+      isUploading.value = false;
+    }
+  }
+};
 const formatSize = (bytes: number) => {
   const k = 1024;
   const dm = 3;
@@ -236,6 +322,10 @@ const onRemoveFile = (index: number) => {
   if (fileUpload.value.uploadedFiles.length > 0) {
     fileUpload.value.uploadedFiles.splice(index, 1);
   }
+};
+
+const removeUploadedImage = (index: number) => {
+  uploadedImageUrls.value.splice(index, 1);
 };
 </script>
 
@@ -263,21 +353,25 @@ const onRemoveFile = (index: number) => {
           >
             <div class="gap-4 flex flex-col">
               <div class="min-w-40">
-                <label for="tieu_de" class="block font-bold mb-3 required"
-                  >Tiêu đề</label
+                <label for="thumucId" class="block font-bold mb-3 required"
+                  >Thư mục</label
                 >
-                <InputText
-                  id="tieu_de"
-                  name="tieu_de"
-                  fluid
-                  placeholder="Nhập tên tiêu đề"
+                <Select
+                  id="thumucId"
+                  name="thumucId"
+                  :options="thuMucList"
+                  option-label="ten_thumuc"
+                  option-value="id"
+                  filter
+                  class="w-full"
+                  placeholder="Chọn loại thư mục"
                 />
                 <Message
-                  v-if="$form.tieu_de?.invalid"
+                  v-if="$form.thumucId?.invalid"
                   severity="error"
                   variant="simple"
                 >
-                  {{ $form.tieu_de.error.message }}
+                  {{ $form.thumucId.error.message }}
                 </Message>
               </div>
               <div class="min-w-40">
@@ -317,6 +411,7 @@ const onRemoveFile = (index: number) => {
                 </Message>
               </div>
               <div class="min-w-40">
+                <label class="block font-bold mb-3">Ảnh</label>
                 <FileUpload
                   ref="fileUpload"
                   v-model="url"
@@ -351,12 +446,22 @@ const onRemoveFile = (index: number) => {
                         </div>
                         <Badge
                           :value="
-                            uploadStatus === 'waiting'
-                              ? 'Chờ đợi'
-                              : 'Thành công'
+                            uploadStatus === 'waiting' 
+                              ? 'Chờ đợi' 
+                              : uploadStatus === 'uploading' 
+                                ? 'Đang tải lên' 
+                                : uploadStatus === 'success' 
+                                  ? 'Thành công' 
+                                  : 'Lỗi'
                           "
                           :severity="
-                            uploadStatus === 'waiting' ? 'warn' : 'success'
+                            uploadStatus === 'waiting' 
+                              ? 'warn' 
+                              : uploadStatus === 'uploading' 
+                                ? 'info' 
+                                : uploadStatus === 'success' 
+                                  ? 'success' 
+                                  : 'danger'
                           "
                         />
                         <div class="ml-auto">
@@ -398,6 +503,28 @@ const onRemoveFile = (index: number) => {
                         </div>
                       </div>
                     </div>
+                    
+                    <!-- Display uploaded images -->
+                    <div v-if="uploadedImageUrls.length > 0" class="mt-4">
+                      <h3 class="font-bold mb-2">Ảnh đã tải lên</h3>
+                      <div class="grid grid-cols-3 gap-4">
+                        <div 
+                          v-for="(url, index) in uploadedImageUrls" 
+                          :key="index"
+                          class="relative"
+                        >
+                          <img :src="url" alt="Uploaded" class="w-full h-32 object-cover rounded" />
+                          <Button
+                            icon="pi pi-times"
+                            class="absolute top-1 right-1"
+                            size="small"
+                            rounded
+                            severity="danger"
+                            @click="removeUploadedImage(index)"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </template>
                   <template #empty>
                     <div class="flex items-center justify-center flex-col">
@@ -408,6 +535,15 @@ const onRemoveFile = (index: number) => {
                     </div>
                   </template>
                 </FileUpload>
+                <!-- Show uploaded image URLs as JSON -->
+                <div v-if="uploadedImageUrls.length > 0" class="mt-4">
+                  <label class="block font-bold mb-2">URLs ảnh (JSON)</label>
+                  <textarea 
+                    readonly 
+                    class="w-full p-2 border rounded bg-gray-100" 
+                    rows="3"
+                  >{{ JSON.stringify(uploadedImageUrls) }}</textarea>
+                </div>
               </div>
               <div class="min-w-40">
                 <label for="vi_tri" class="block font-bold mb-3 required"
@@ -450,7 +586,12 @@ const onRemoveFile = (index: number) => {
           severity="danger"
           @click="handleHideModal"
         />
-        <Button label="Lưu" type="submit" @click="form?.submit" />
+        <Button 
+          label="Lưu" 
+          type="submit" 
+          :disabled="isUploading"
+          @click="form?.submit" 
+        />
       </template>
     </Dialog>
   </ClientOnly>

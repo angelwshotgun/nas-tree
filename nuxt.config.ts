@@ -15,6 +15,11 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxthub/core',
   ],
+  runtimeConfig: {
+    public: {
+      firebase: process.env.FIREBASE_SERVICE_ACCOUNT,
+    },
+  },
   hub: {
     remote: true,
     database: true,

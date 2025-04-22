@@ -37,8 +37,9 @@ onMounted(async () => {
 });
 
 const onReloadDataTable = async () => {
-  await ThuMucService.GetThuMuc().then((response) => {
-    thuMucList.value = response;
+  await BaiVietService.GetBaiViet().then((response) => {
+    baiVietList.value = response;
+    useNuxtData('baiVietList').data.value = response;
   });
 };
 
@@ -131,8 +132,18 @@ const onHandleDelete = (rowData: ThuMucModel) => {
           </div>
         </div>
       </template>
-      <Column field="ten_thumuc" header="Tên thư mục" style="min-width: 5rem" />
-      <Column field="order_id" header="Thứ tự" style="min-width: 5rem" />
+      <Column field="thumuc.ten_thumuc" header="Thư mục" style="min-width: 5rem" />
+      <Column field="tieu_de" header="Tiêu đề" style="min-width: 5rem" />
+      <Column field="vi_tri" header="Link địa chỉ" style="min-width: 5rem" />
+      <Column field="anh" header="Ảnh" style="min-width: 5rem">
+        <template #body="slotProps">
+          <img
+            :src="JSON.parse(slotProps.data.anh)[0]"
+            alt="Image"
+            width="100"
+          />
+        </template>
+      </Column>
       <Column>
         <template #header>
           <th>Thao tác</th>

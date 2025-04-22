@@ -10,10 +10,10 @@ class _BaiVietService {
     return [];
   }
 
-  async Insert(form: FormData) {
+  async Insert(entity: BaiVietModel) {
     const res = await $api<BaiVietModel>(`/api/bai-viet`, {
       method: 'POST',
-      body: form,
+      body: entity,
     });
     if (res) {
       return res;
@@ -21,10 +21,10 @@ class _BaiVietService {
     return null;
   }
 
-  async Update(form: FormData) {
-    const res = await $api<BaiVietModel>(`/api/bai-viet/${form.get('id')}`, {
+  async Update(entity: BaiVietModel) {
+    const res = await $api<BaiVietModel>(`/api/bai-viet/${entity.id}`, {
       method: 'PATCH',
-      body: form,
+      body: entity,
     });
     if (res) {
       return res;
