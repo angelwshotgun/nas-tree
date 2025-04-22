@@ -1,8 +1,9 @@
 import type { BaiVietModel } from '~/models/bai-viet.model';
 class _BaiVietService {
-  async GetBaiViet() {
+  async GetBaiViet(thumucId?: string) {
     const response = await $api<BaiVietModel[]>('/api/public/bai-viet', {
       method: 'GET',
+      params: { thumucId },
     });
     if (response) {
       return response;

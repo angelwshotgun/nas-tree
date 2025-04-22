@@ -1,5 +1,7 @@
-export default defineEventHandler(async () => {
-  const baiviets = await useDrizzle()
+export default defineEventHandler(async (event) => {
+  const { thumucId } = getQuery(event);
+
+  const query = useDrizzle()
     .select({
       id: tables.baiviet.id,
       tieu_de: tables.baiviet.tieu_de,
@@ -12,7 +14,12 @@ export default defineEventHandler(async () => {
       vi_tri: tables.baiviet.vi_tri,
     })
     .from(tables.baiviet)
-    .leftJoin(tables.thumuc, eq(tables.baiviet.thumucId, tables.thumuc.id))
-    .all();
+    .leftJoin(tables.thumuc, eq(tables.baiviet.thumucId, tables.thumuc.id));
+
+  if (thumucId) {
+    query.where(eq(tables.baiviet.thumucId, Number(thumucId)));
+  }
+
+  const baiviets = await query.all();
   return baiviets;
 });

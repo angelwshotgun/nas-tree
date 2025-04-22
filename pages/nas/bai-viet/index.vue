@@ -10,7 +10,7 @@ const toast = useToast();
 const confirm = useConfirm();
 const keyWords = ref('');
 
-const thuMucSelect = ref();
+const baiVietSelect = ref();
 
 const { data: thuMucList } = useNuxtData('thuMucList');
 const { data: baiVietList } = useNuxtData('baiVietList');
@@ -43,12 +43,12 @@ const onReloadDataTable = async () => {
   });
 };
 
-const onHandleEdit = async (rowData: ThuMucModel) => {
-  thuMucSelect.value = rowData;
+const onHandleEdit = async (rowData: BaiVietModel) => {
+  baiVietSelect.value = rowData;
   isOpenModal.value = true;
 };
 
-const onHandleDelete = (rowData: ThuMucModel) => {
+const onHandleDelete = (rowData: BaiVietModel) => {
   confirm.require({
     message: 'Bạn có chắc muốn xóa thông tin này',
     icon: 'pi pi-question-circle',
@@ -62,7 +62,7 @@ const onHandleDelete = (rowData: ThuMucModel) => {
     },
     accept: () => {
       if (rowData) {
-        ThuMucService.Delete(rowData)
+        BaiVietService.Delete(rowData)
           .then((response) => {
             if (response) {
               toast.add({
@@ -105,7 +105,7 @@ const onHandleDelete = (rowData: ThuMucModel) => {
       :rows="10"
       :rows-per-page-options="[10, 20, 50]"
       paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-      current-page-report-template="hiển thị từ {first} đến {last} trong {totalRecords} thư mục"
+      current-page-report-template="hiển thị từ {first} đến {last} trong {totalRecords} bài viết"
       show-gridlines
     >
       <template #header>
@@ -172,9 +172,10 @@ const onHandleDelete = (rowData: ThuMucModel) => {
     <DialogBaiViet
       v-model:is-visible="isOpenModal"
       :thu-muc-list="thuMucList"
+      :bai-viet="baiVietSelect"
       @hide-modal="
         isOpenModal = false;
-        thuMucSelect = null;
+        baiVietSelect = null;
       "
       @reload-data-table="onReloadDataTable"
     />

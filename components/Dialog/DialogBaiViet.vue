@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { yupResolver } from '@primevue/forms/resolvers/yup';
-import * as yup from 'yup';
-import type { FormSubmitEvent, FormInstance } from '@primevue/forms/form';
-import type { ThuMucModel } from '~/models/thu-muc.model';
-import { ThuMucService } from '~/services/thu-muc.service';
-import type { BaiVietModel } from '~/models/bai-viet.model';
-import { BaiVietService } from '~/services/bai-viet.service';
-import { ref as firebaseRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '~/plugins/firebase'; // Ensure you have this file set up with Firebase configuration
+import { yupResolver } from "@primevue/forms/resolvers/yup";
+import * as yup from "yup";
+import type { FormSubmitEvent, FormInstance } from "@primevue/forms/form";
+import type { ThuMucModel } from "~/models/thu-muc.model";
+import { ThuMucService } from "~/services/thu-muc.service";
+import type { BaiVietModel } from "~/models/bai-viet.model";
+import { BaiVietService } from "~/services/bai-viet.service";
+import {
+  ref as firebaseRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+import { storage } from "~/plugins/firebase"; // Ensure you have this file set up with Firebase configuration
 
 const isMounted = ref(false);
 const closeEscapeKeyModalInfo = ref<boolean>(true);
@@ -39,37 +43,66 @@ const internalVisible = computed({
   },
 });
 
-const { data: thuMucList } = useNuxtData('thuMucList');
+const { data: thuMucList } = useNuxtData("thuMucList");
 
 onMounted(async () => {
   if (thuMucList.value) return;
   try {
     const response = await ThuMucService.GetThuMuc();
     thuMucList.value = response;
-    useNuxtData('thuMucList').data.value = response;
+    useNuxtData("thuMucList").data.value = response;
   } catch (error) {
-    console.error('Error fetching thu muc:', error);
+    console.error("Error fetching thu muc:", error);
   }
 });
 
 const form = ref<FormInstance | null>(null);
-const resolver = ref(yupResolver(yup.object().shape({})));
+const resolver = ref(
+  yupResolver(
+    yup.object().shape({
+      tieu_de: yup
+        .string()
+        .nullable()
+        .required("Vui lòng nhập tiêu đề!")
+        .label("tiêu đề"),
+      noi_dung: yup
+        .string()
+        .nullable()
+        .required("Vui lòng nhập nội dung!")
+        .label("nội dung"),
+      thumucId: yup
+        .number()
+        .nullable()
+        .required("Vui lòng nhập thể loại!")
+        .label("thể loại"),
+      vi_tri: yup
+        .string()
+        .nullable()
+        .required("Vui lòng nhập vị trí!")
+        .matches(
+          /^https:\/\/maps\.app\.goo\.gl\/[a-zA-Z0-9]+$/,
+          "Vị trí phải có dạng https://maps.app.goo.gl/"
+        )
+        .label("vị trí"),
+    })
+  )
+);
 
 const initialValues = ref<{
   id: number;
-  tieu_de: string | null;
-  noi_dung: string | null;
-  anh: string | null;
-  vi_tri: string | null;
+  tieu_de: string;
+  noi_dung: string;
+  anh: string;
+  vi_tri: string;
   thumucId: number | null;
   createdAt: number | null;
   updatedAt: number | null;
 }>({
   id: 0,
-  tieu_de: '',
-  noi_dung: '',
-  anh: '',
-  vi_tri: '',
+  tieu_de: "",
+  noi_dung: "",
+  anh: "",
+  vi_tri: "",
   thumucId: null,
   createdAt: null,
   updatedAt: null,
@@ -80,7 +113,7 @@ const onSubmit = (e: FormSubmitEvent) => {
     const BaiVietDTO: BaiVietModel = {
       id: initialValues.value.id,
       tieu_de: e.values.tieu_de,
-      noi_dung: e.values.noi_dung,
+      noi_dung: e.values.noi_dung.replace(/&nbsp;/g, " "),
       vi_tri: e.values.vi_tri,
       thumucId: e.values.thumucId,
       anh: JSON.stringify(uploadedImageUrls.value), // Convert array to JSON string
@@ -88,17 +121,17 @@ const onSubmit = (e: FormSubmitEvent) => {
     confirm.require({
       message: `${
         BaiVietDTO.id != null && BaiVietDTO.id > 0
-          ? 'Bạn có chắc muốn cập nhật thông tin này?'
-          : 'Bạn có chắc muốn thêm thông tin này?'
+          ? "Bạn có chắc muốn cập nhật thông tin này?"
+          : "Bạn có chắc muốn thêm thông tin này?"
       }`,
-      icon: 'pi pi-question-circle',
+      icon: "pi pi-question-circle",
       rejectProps: {
-        label: 'Hủy',
-        severity: 'secondary',
+        label: "Hủy",
+        severity: "secondary",
         outlined: true,
       },
       acceptProps: {
-        label: 'Xác nhận',
+        label: "Xác nhận",
       },
       accept: () => {
         if (BaiVietDTO.id != null && BaiVietDTO.id > 0) {
@@ -106,19 +139,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: 'success',
-                  summary: 'Thành công',
-                  detail: 'Cập nhật thông tin thành công!',
+                  severity: "success",
+                  summary: "Thành công",
+                  detail: "Cập nhật thông tin thành công!",
                   life: 3000,
                 });
                 e.reset();
-                emit('reloadDataTable');
+                emit("reloadDataTable");
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: 'error',
-                  summary: 'Thất bại',
-                  detail: 'Cập nhật thông tin không thành công!',
+                  severity: "error",
+                  summary: "Thất bại",
+                  detail: "Cập nhật thông tin không thành công!",
                   life: 3000,
                 });
                 e.reset();
@@ -127,9 +160,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: 'error',
-                summary: 'Lỗi',
-                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
+                severity: "error",
+                summary: "Lỗi",
+                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
                 life: 3000,
               });
               e.reset();
@@ -140,19 +173,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: 'success',
-                  summary: 'Thành công',
-                  detail: 'Thêm mới thông tin thành công!',
+                  severity: "success",
+                  summary: "Thành công",
+                  detail: "Thêm mới thông tin thành công!",
                   life: 3000,
                 });
                 e.reset();
-                emit('reloadDataTable');
+                emit("reloadDataTable");
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: 'error',
-                  summary: 'Thất bại',
-                  detail: 'Thêm mới thông tin không thành công!',
+                  severity: "error",
+                  summary: "Thất bại",
+                  detail: "Thêm mới thông tin không thành công!",
                   life: 3000,
                 });
                 e.reset();
@@ -161,9 +194,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: 'error',
-                summary: 'Lỗi',
-                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
+                severity: "error",
+                summary: "Lỗi",
+                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
                 life: 3000,
               });
               e.reset();
@@ -179,16 +212,19 @@ const onSubmit = (e: FormSubmitEvent) => {
 watchEffect(() => {
   if (props.baiViet?.id != undefined) {
     initialValues.value.id = props.baiViet?.id;
-    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? '';
+    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? "";
+    initialValues.value.noi_dung = props.baiViet?.noi_dung ?? "";
+    initialValues.value.vi_tri = props.baiViet?.vi_tri ?? "";
+    initialValues.value.thumucId = props.baiViet?.thumucId ?? null;
+    initialValues.value.anh = props.baiViet?.anh ?? "";
     initialValues.value.createdAt = props.baiViet?.createdAt ?? null;
     initialValues.value.updatedAt = props.baiViet?.updatedAt ?? null;
-    
-    // Parse the JSON string back to array if it exists
+
     if (props.baiViet?.anh) {
       try {
         uploadedImageUrls.value = JSON.parse(props.baiViet.anh);
       } catch (error) {
-        console.error('Error parsing image URLs:', error);
+        console.error("Error parsing image URLs:", error);
         uploadedImageUrls.value = [];
       }
     }
@@ -209,93 +245,94 @@ onMounted(async () => {
   isMounted.value = true;
 });
 
-const emit = defineEmits(['hideModal', 'reloadDataTable']);
+const emit = defineEmits(["hideModal", "reloadDataTable"]);
 
 const handleHideModal = () => {
   initialValues.value = {
     id: 0,
-    tieu_de: '',
-    noi_dung: '',
-    anh: '',
-    vi_tri: '',
+    tieu_de: "",
+    noi_dung: "",
+    anh: "",
+    vi_tri: "",
     thumucId: null,
     createdAt: null,
     updatedAt: null,
   };
   uploadedImageUrls.value = [];
-  emit('hideModal');
+  emit("hideModal");
 };
 
 const url = ref();
 const fileUpload = ref();
 const isLoading = ref(false);
-const uploadStatus = ref<'waiting' | 'uploading' | 'success' | 'error'>('waiting');
+const uploadStatus = ref<"waiting" | "uploading" | "success" | "error">(
+  "waiting"
+);
 const uploadProgress = ref<{ [key: string]: number }>({});
 
-// Function to upload file to Firebase
 const uploadToFirebase = async (file: File): Promise<string> => {
   try {
     const timestamp = new Date().getTime();
     const storageRef = firebaseRef(storage, `images/${timestamp}_${file.name}`);
-    
+
     // Upload file
     const snapshot = await uploadBytes(storageRef, file);
-    
+
     // Get download URL
     const downloadURL = await getDownloadURL(snapshot.ref);
     return downloadURL;
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error("Error uploading file:", error);
     throw error;
   }
 };
 
 const onFileChange = async () => {
-  uploadStatus.value = 'uploading';
+  uploadStatus.value = "uploading";
   isLoading.value = true;
   isUploading.value = true;
-  
+
   const files = fileUpload.value?.files;
-  
+
   if (files && files.length > 0) {
     try {
       const uploadPromises = Array.from(files).map(async (file: unknown) => {
         if (!(file instanceof File)) {
-          throw new Error('Invalid file type');
+          throw new Error("Invalid file type");
         }
-        
+
         // Set initial progress for this file
         uploadProgress.value[file.name] = 0;
-        
+
         // Upload and get URL
         const url = await uploadToFirebase(file);
-        
+
         // Update progress
         uploadProgress.value[file.name] = 100;
-        
+
         return url;
       });
-      
+
       // Wait for all uploads to complete
       const urls = await Promise.all(uploadPromises);
-      
+
       // Add new URLs to the existing array
       uploadedImageUrls.value = [...uploadedImageUrls.value, ...urls];
-      
-      uploadStatus.value = 'success';
+
+      uploadStatus.value = "success";
       toast.add({
-        severity: 'success',
-        summary: 'Thành công',
-        detail: 'Tải lên ảnh thành công!',
+        severity: "success",
+        summary: "Thành công",
+        detail: "Tải lên ảnh thành công!",
         life: 3000,
       });
     } catch (error) {
-      console.error('Error uploading files:', error);
-      uploadStatus.value = 'error';
+      console.error("Error uploading files:", error);
+      uploadStatus.value = "error";
       toast.add({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Tải lên ảnh không thành công!',
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Tải lên ảnh không thành công!",
         life: 3000,
       });
     } finally {
@@ -304,10 +341,11 @@ const onFileChange = async () => {
     }
   }
 };
+
 const formatSize = (bytes: number) => {
   const k = 1024;
   const dm = 3;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   if (bytes === 0) {
     return `0 ${sizes[0]}`;
   }
@@ -338,7 +376,7 @@ const removeUploadedImage = (index: number) => {
         props.baiViet?.id === 0 || props.baiViet?.id === undefined
           ? 'Thêm mới '
           : 'Cập nhật '
-      } thư mục`"
+      } bài viết`"
       :modal="true"
       :close-on-escape="closeEscapeKeyModalInfo"
     >
@@ -446,22 +484,22 @@ const removeUploadedImage = (index: number) => {
                         </div>
                         <Badge
                           :value="
-                            uploadStatus === 'waiting' 
-                              ? 'Chờ đợi' 
-                              : uploadStatus === 'uploading' 
-                                ? 'Đang tải lên' 
-                                : uploadStatus === 'success' 
-                                  ? 'Thành công' 
-                                  : 'Lỗi'
+                            uploadStatus === 'waiting'
+                              ? 'Chờ đợi'
+                              : uploadStatus === 'uploading'
+                              ? 'Đang tải lên'
+                              : uploadStatus === 'success'
+                              ? 'Thành công'
+                              : 'Lỗi'
                           "
                           :severity="
-                            uploadStatus === 'waiting' 
-                              ? 'warn' 
-                              : uploadStatus === 'uploading' 
-                                ? 'info' 
-                                : uploadStatus === 'success' 
-                                  ? 'success' 
-                                  : 'danger'
+                            uploadStatus === 'waiting'
+                              ? 'warn'
+                              : uploadStatus === 'uploading'
+                              ? 'info'
+                              : uploadStatus === 'success'
+                              ? 'success'
+                              : 'danger'
                           "
                         />
                         <div class="ml-auto">
@@ -503,17 +541,21 @@ const removeUploadedImage = (index: number) => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <!-- Display uploaded images -->
                     <div v-if="uploadedImageUrls.length > 0" class="mt-4">
                       <h3 class="font-bold mb-2">Ảnh đã tải lên</h3>
                       <div class="grid grid-cols-3 gap-4">
-                        <div 
-                          v-for="(url, index) in uploadedImageUrls" 
+                        <div
+                          v-for="(url, index) in uploadedImageUrls"
                           :key="index"
                           class="relative"
                         >
-                          <img :src="url" alt="Uploaded" class="w-full h-32 object-cover rounded" />
+                          <img
+                            :src="url"
+                            alt="Uploaded"
+                            class="w-full h-32 object-cover rounded"
+                          />
                           <Button
                             icon="pi pi-times"
                             class="absolute top-1 right-1"
@@ -536,14 +578,14 @@ const removeUploadedImage = (index: number) => {
                   </template>
                 </FileUpload>
                 <!-- Show uploaded image URLs as JSON -->
-                <div v-if="uploadedImageUrls.length > 0" class="mt-4">
+                <!-- <div v-if="uploadedImageUrls.length > 0" class="mt-4">
                   <label class="block font-bold mb-2">URLs ảnh (JSON)</label>
                   <textarea 
                     readonly 
                     class="w-full p-2 border rounded bg-gray-100" 
                     rows="3"
                   >{{ JSON.stringify(uploadedImageUrls) }}</textarea>
-                </div>
+                </div> -->
               </div>
               <div class="min-w-40">
                 <label for="vi_tri" class="block font-bold mb-3 required"
@@ -586,11 +628,11 @@ const removeUploadedImage = (index: number) => {
           severity="danger"
           @click="handleHideModal"
         />
-        <Button 
-          label="Lưu" 
-          type="submit" 
+        <Button
+          label="Lưu"
+          type="submit"
           :disabled="isUploading"
-          @click="form?.submit" 
+          @click="form?.submit"
         />
       </template>
     </Dialog>
