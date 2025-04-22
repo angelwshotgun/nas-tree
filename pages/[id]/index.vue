@@ -73,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import type { BaiVietModel } from "~/models/bai-viet.model";
 import { BaiVietService } from "~/services/bai-viet.service";
 
 definePageMeta({
@@ -83,18 +84,9 @@ definePageMeta({
 const route = useRoute();
 const id = route.params.id;
 
-const { data: listBaiViet } = useNuxtData("listBaiViet");
-
-onMounted(async () => {
-  if (!listBaiViet.value) {
-    try {
-      const response = await BaiVietService.GetBaiViet(id.toString());
-      listBaiViet.value = response;
-      useNuxtData("listBaiViet").data.value = response;
-    } catch (error) {
-      console.error("Error fetching bai viet:", error);
-    }
-  }
+const listBaiViet = ref<BaiVietModel[]>([]);
+BaiVietService.GetBaiViet(id.toString()).then((response) => {
+  listBaiViet.value = response;
 });
 
 const home = ref({
