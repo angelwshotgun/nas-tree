@@ -65,6 +65,11 @@ const resolver = ref(
         .nullable()
         .required("Vui lòng nhập tiêu đề!")
         .label("tiêu đề"),
+      mo_ta: yup
+        .string()
+        .nullable()
+        .required("Vui lòng nhập mô tả!")
+        .label("mô tả"),
       noi_dung: yup
         .string()
         .nullable()
@@ -79,10 +84,6 @@ const resolver = ref(
         .string()
         .nullable()
         .required("Vui lòng nhập vị trí!")
-        .matches(
-          /^https:\/\/maps\.app\.goo\.gl\/[a-zA-Z0-9]+$/,
-          "Vị trí phải có dạng https://maps.app.goo.gl/"
-        )
         .label("vị trí"),
     })
   )
@@ -91,6 +92,7 @@ const resolver = ref(
 const initialValues = ref<{
   id: number;
   tieu_de: string;
+  mo_ta: string;
   noi_dung: string;
   anh: string;
   vi_tri: string;
@@ -100,6 +102,7 @@ const initialValues = ref<{
 }>({
   id: 0,
   tieu_de: "",
+  mo_ta: '',
   noi_dung: "",
   anh: "",
   vi_tri: "",
@@ -113,6 +116,7 @@ const onSubmit = (e: FormSubmitEvent) => {
     const BaiVietDTO: BaiVietModel = {
       id: initialValues.value.id,
       tieu_de: e.values.tieu_de,
+      mo_ta: e.values.mo_ta,
       noi_dung: e.values.noi_dung.replace(/&nbsp;/g, " "),
       vi_tri: e.values.vi_tri,
       thumucId: e.values.thumucId,
@@ -213,6 +217,7 @@ watchEffect(() => {
   if (props.baiViet?.id != undefined) {
     initialValues.value.id = props.baiViet?.id;
     initialValues.value.tieu_de = props.baiViet?.tieu_de ?? "";
+    initialValues.value.mo_ta = props.baiViet?.mo_ta ?? "";
     initialValues.value.noi_dung = props.baiViet?.noi_dung ?? "";
     initialValues.value.vi_tri = props.baiViet?.vi_tri ?? "";
     initialValues.value.thumucId = props.baiViet?.thumucId ?? null;
@@ -251,6 +256,7 @@ const handleHideModal = () => {
   initialValues.value = {
     id: 0,
     tieu_de: "",
+    mo_ta: "",
     noi_dung: "",
     anh: "",
     vi_tri: "",

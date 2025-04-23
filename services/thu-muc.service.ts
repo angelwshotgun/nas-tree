@@ -20,6 +20,16 @@ class _ThuMucService {
     return [];
   }
 
+  async GetThuMucByIdPublic(id: number) {
+    const response = await $api<ThuMucModel>(`/api/public/thu-muc/${id}`, {
+      method: 'GET',
+    });
+    if (response) {
+      return response;
+    }
+    return undefined;
+  }
+
   async Insert(entity: ThuMucModel) {
     const res = await $api<ThuMucModel>(`/api/thu-muc`, {
       method: 'POST',

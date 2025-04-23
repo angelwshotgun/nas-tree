@@ -82,7 +82,8 @@ export const authenticators = sqliteTable(
 export const thumuc = sqliteTable("thumuc", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   ten_thumuc: text("ten_thumuc").notNull(),
-  thu_tu: integer("thu_tu").notNull().default(0),
+  thu_tu: integer("thu_tu").notNull(),
+  duong_dan: text('duong_dan').notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
@@ -90,6 +91,8 @@ export const thumuc = sqliteTable("thumuc", {
 export const baiviet = sqliteTable("baiviet", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   tieu_de: text("tieu_de").notNull(),
+  mo_ta: text('mo_ta').notNull(),
+  duong_dan: text('duong_dan').notNull(),
   noi_dung: text("noi_dung").notNull(),
   anh: text("anh"),
   vi_tri: text("vi_tri"),
