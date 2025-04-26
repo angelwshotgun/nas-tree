@@ -1,5 +1,8 @@
 export default defineEventHandler(async (event) => {
-  const { duong_dan } = getQuery(event);
+  const duongDanParam = getRouterParam(event, 'id');
+  if (!duongDanParam) {
+    throw new Error('Invalid or missing duong_dan parameter');
+  }
 
   const query = useDrizzle()
     .select({
@@ -16,12 +19,9 @@ export default defineEventHandler(async (event) => {
       vi_tri: tables.baiviet.vi_tri,
     })
     .from(tables.baiviet)
-    .leftJoin(tables.thumuc, eq(tables.baiviet.thumucId, tables.thumuc.id));
+    .leftJoin(tables.thumuc, eq(tables.baiviet.thumucId, tables.thumuc.id))
+    .where(eq(tables.baiviet.duong_dan, duongDanParam));
 
-  if (typeof duong_dan === 'string') {
-    query.where(eq(tables.thumuc.duong_dan, duong_dan));
-  }
-
-  const baiviets = await query.all();
-  return baiviets;
+  const baiviet = await query.get();
+  return baiviet;
 });

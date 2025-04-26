@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { yupResolver } from "@primevue/forms/resolvers/yup";
-import * as yup from "yup";
-import type { FormSubmitEvent, FormInstance } from "@primevue/forms/form";
-import type { ThuMucModel } from "~/models/thu-muc.model";
-import { ThuMucService } from "~/services/thu-muc.service";
-import type { BaiVietModel } from "~/models/bai-viet.model";
-import { BaiVietService } from "~/services/bai-viet.service";
+import { yupResolver } from '@primevue/forms/resolvers/yup';
+import * as yup from 'yup';
+import type { FormSubmitEvent, FormInstance } from '@primevue/forms/form';
+import type { ThuMucModel } from '~/models/thu-muc.model';
+import { ThuMucService } from '~/services/thu-muc.service';
+import type { BaiVietModel } from '~/models/bai-viet.model';
+import { BaiVietService } from '~/services/bai-viet.service';
 import {
   ref as firebaseRef,
   uploadBytes,
   getDownloadURL,
-} from "firebase/storage";
-import { storage } from "~/plugins/firebase"; // Ensure you have this file set up with Firebase configuration
+} from 'firebase/storage';
+import { storage } from '~/plugins/firebase'; // Ensure you have this file set up with Firebase configuration
 
 const isMounted = ref(false);
 const closeEscapeKeyModalInfo = ref<boolean>(true);
@@ -21,6 +21,7 @@ const toast = useToast();
 const thuMucSelect = ref();
 const uploadedImageUrls = ref<string[]>([]);
 const isUploading = ref(false);
+const isEnabled = ref(false);
 
 const props = defineProps({
   isVisible: {
@@ -43,16 +44,16 @@ const internalVisible = computed({
   },
 });
 
-const { data: thuMucList } = useNuxtData("thuMucList");
+const { data: thuMucList } = useNuxtData('thuMucList');
 
 onMounted(async () => {
   if (thuMucList.value) return;
   try {
     const response = await ThuMucService.GetThuMuc();
     thuMucList.value = response;
-    useNuxtData("thuMucList").data.value = response;
+    useNuxtData('thuMucList').data.value = response;
   } catch (error) {
-    console.error("Error fetching thu muc:", error);
+    console.error('Error fetching thu muc:', error);
   }
 });
 
@@ -63,28 +64,24 @@ const resolver = ref(
       tieu_de: yup
         .string()
         .nullable()
-        .required("Vui lòng nhập tiêu đề!")
-        .label("tiêu đề"),
+        .required('Vui lòng nhập tiêu đề!')
+        .label('tiêu đề'),
       mo_ta: yup
         .string()
         .nullable()
-        .required("Vui lòng nhập mô tả!")
-        .label("mô tả"),
-      noi_dung: yup
-        .string()
-        .nullable()
-        .required("Vui lòng nhập nội dung!")
-        .label("nội dung"),
+        .required('Vui lòng nhập mô tả!')
+        .label('mô tả'),
+      noi_dung: yup.string().nullable().label('nội dung'),
       thumucId: yup
         .number()
         .nullable()
-        .required("Vui lòng nhập thể loại!")
-        .label("thể loại"),
+        .required('Vui lòng nhập thể loại!')
+        .label('thể loại'),
       vi_tri: yup
         .string()
         .nullable()
-        .required("Vui lòng nhập vị trí!")
-        .label("vị trí"),
+        .required('Vui lòng nhập vị trí!')
+        .label('vị trí'),
     })
   )
 );
@@ -101,11 +98,11 @@ const initialValues = ref<{
   updatedAt: number | null;
 }>({
   id: 0,
-  tieu_de: "",
+  tieu_de: '',
   mo_ta: '',
-  noi_dung: "",
-  anh: "",
-  vi_tri: "",
+  noi_dung: '',
+  anh: '',
+  vi_tri: '',
   thumucId: null,
   createdAt: null,
   updatedAt: null,
@@ -117,7 +114,7 @@ const onSubmit = (e: FormSubmitEvent) => {
       id: initialValues.value.id,
       tieu_de: e.values.tieu_de,
       mo_ta: e.values.mo_ta,
-      noi_dung: e.values.noi_dung.replace(/&nbsp;/g, " "),
+      noi_dung: e.values.noi_dung.replace(/&nbsp;/g, ' '),
       vi_tri: e.values.vi_tri,
       thumucId: e.values.thumucId,
       anh: JSON.stringify(uploadedImageUrls.value), // Convert array to JSON string
@@ -125,17 +122,17 @@ const onSubmit = (e: FormSubmitEvent) => {
     confirm.require({
       message: `${
         BaiVietDTO.id != null && BaiVietDTO.id > 0
-          ? "Bạn có chắc muốn cập nhật thông tin này?"
-          : "Bạn có chắc muốn thêm thông tin này?"
+          ? 'Bạn có chắc muốn cập nhật thông tin này?'
+          : 'Bạn có chắc muốn thêm thông tin này?'
       }`,
-      icon: "pi pi-question-circle",
+      icon: 'pi pi-question-circle',
       rejectProps: {
-        label: "Hủy",
-        severity: "secondary",
+        label: 'Hủy',
+        severity: 'secondary',
         outlined: true,
       },
       acceptProps: {
-        label: "Xác nhận",
+        label: 'Xác nhận',
       },
       accept: () => {
         if (BaiVietDTO.id != null && BaiVietDTO.id > 0) {
@@ -143,19 +140,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: "success",
-                  summary: "Thành công",
-                  detail: "Cập nhật thông tin thành công!",
+                  severity: 'success',
+                  summary: 'Thành công',
+                  detail: 'Cập nhật thông tin thành công!',
                   life: 3000,
                 });
                 e.reset();
-                emit("reloadDataTable");
+                emit('reloadDataTable');
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: "error",
-                  summary: "Thất bại",
-                  detail: "Cập nhật thông tin không thành công!",
+                  severity: 'error',
+                  summary: 'Thất bại',
+                  detail: 'Cập nhật thông tin không thành công!',
                   life: 3000,
                 });
                 e.reset();
@@ -164,9 +161,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: "error",
-                summary: "Lỗi",
-                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
+                severity: 'error',
+                summary: 'Lỗi',
+                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
                 life: 3000,
               });
               e.reset();
@@ -177,19 +174,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: "success",
-                  summary: "Thành công",
-                  detail: "Thêm mới thông tin thành công!",
+                  severity: 'success',
+                  summary: 'Thành công',
+                  detail: 'Thêm mới thông tin thành công!',
                   life: 3000,
                 });
                 e.reset();
-                emit("reloadDataTable");
+                emit('reloadDataTable');
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: "error",
-                  summary: "Thất bại",
-                  detail: "Thêm mới thông tin không thành công!",
+                  severity: 'error',
+                  summary: 'Thất bại',
+                  detail: 'Thêm mới thông tin không thành công!',
                   life: 3000,
                 });
                 e.reset();
@@ -198,9 +195,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: "error",
-                summary: "Lỗi",
-                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
+                severity: 'error',
+                summary: 'Lỗi',
+                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
                 life: 3000,
               });
               e.reset();
@@ -215,13 +212,17 @@ const onSubmit = (e: FormSubmitEvent) => {
 
 watchEffect(() => {
   if (props.baiViet?.id != undefined) {
+    if (props.baiViet?.noi_dung !== '<p> </p>') {
+      isEnabled.value = true;
+      form.value?.setFieldValue('noi_dung', props.baiViet?.noi_dung);
+    }
     initialValues.value.id = props.baiViet?.id;
-    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? "";
-    initialValues.value.mo_ta = props.baiViet?.mo_ta ?? "";
-    initialValues.value.noi_dung = props.baiViet?.noi_dung ?? "";
-    initialValues.value.vi_tri = props.baiViet?.vi_tri ?? "";
+    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? '';
+    initialValues.value.mo_ta = props.baiViet?.mo_ta ?? '';
+    initialValues.value.noi_dung = props.baiViet?.noi_dung ?? '';
+    initialValues.value.vi_tri = props.baiViet?.vi_tri ?? '';
     initialValues.value.thumucId = props.baiViet?.thumucId ?? null;
-    initialValues.value.anh = props.baiViet?.anh ?? "";
+    initialValues.value.anh = props.baiViet?.anh ?? '';
     initialValues.value.createdAt = props.baiViet?.createdAt ?? null;
     initialValues.value.updatedAt = props.baiViet?.updatedAt ?? null;
 
@@ -229,7 +230,7 @@ watchEffect(() => {
       try {
         uploadedImageUrls.value = JSON.parse(props.baiViet.anh);
       } catch (error) {
-        console.error("Error parsing image URLs:", error);
+        console.error('Error parsing image URLs:', error);
         uploadedImageUrls.value = [];
       }
     }
@@ -246,33 +247,44 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => isEnabled,
+  () => {
+    if (isEnabled.value === false) {
+      initialValues.value.noi_dung = '<p> </p>';
+      form.value?.setFieldValue('noi_dung', '<p> </p>');
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(async () => {
   isMounted.value = true;
 });
 
-const emit = defineEmits(["hideModal", "reloadDataTable"]);
+const emit = defineEmits(['hideModal', 'reloadDataTable']);
 
 const handleHideModal = () => {
   initialValues.value = {
     id: 0,
-    tieu_de: "",
-    mo_ta: "",
-    noi_dung: "",
-    anh: "",
-    vi_tri: "",
+    tieu_de: '',
+    mo_ta: '',
+    noi_dung: '',
+    anh: '',
+    vi_tri: '',
     thumucId: null,
     createdAt: null,
     updatedAt: null,
   };
   uploadedImageUrls.value = [];
-  emit("hideModal");
+  emit('hideModal');
 };
 
 const url = ref();
 const fileUpload = ref();
 const isLoading = ref(false);
-const uploadStatus = ref<"waiting" | "uploading" | "success" | "error">(
-  "waiting"
+const uploadStatus = ref<'waiting' | 'uploading' | 'success' | 'error'>(
+  'waiting'
 );
 const uploadProgress = ref<{ [key: string]: number }>({});
 
@@ -281,20 +293,18 @@ const uploadToFirebase = async (file: File): Promise<string> => {
     const timestamp = new Date().getTime();
     const storageRef = firebaseRef(storage, `images/${timestamp}_${file.name}`);
 
-    // Upload file
     const snapshot = await uploadBytes(storageRef, file);
 
-    // Get download URL
     const downloadURL = await getDownloadURL(snapshot.ref);
     return downloadURL;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error('Error uploading file:', error);
     throw error;
   }
 };
 
 const onFileChange = async () => {
-  uploadStatus.value = "uploading";
+  uploadStatus.value = 'uploading';
   isLoading.value = true;
   isUploading.value = true;
 
@@ -304,41 +314,36 @@ const onFileChange = async () => {
     try {
       const uploadPromises = Array.from(files).map(async (file: unknown) => {
         if (!(file instanceof File)) {
-          throw new Error("Invalid file type");
+          throw new Error('Invalid file type');
         }
 
-        // Set initial progress for this file
         uploadProgress.value[file.name] = 0;
 
-        // Upload and get URL
         const url = await uploadToFirebase(file);
 
-        // Update progress
         uploadProgress.value[file.name] = 100;
 
         return url;
       });
 
-      // Wait for all uploads to complete
       const urls = await Promise.all(uploadPromises);
 
-      // Add new URLs to the existing array
       uploadedImageUrls.value = [...uploadedImageUrls.value, ...urls];
 
-      uploadStatus.value = "success";
+      uploadStatus.value = 'success';
       toast.add({
-        severity: "success",
-        summary: "Thành công",
-        detail: "Tải lên ảnh thành công!",
+        severity: 'success',
+        summary: 'Thành công',
+        detail: 'Tải lên ảnh thành công!',
         life: 3000,
       });
     } catch (error) {
-      console.error("Error uploading files:", error);
-      uploadStatus.value = "error";
+      console.error('Error uploading files:', error);
+      uploadStatus.value = 'error';
       toast.add({
-        severity: "error",
-        summary: "Lỗi",
-        detail: "Tải lên ảnh không thành công!",
+        severity: 'error',
+        summary: 'Lỗi',
+        detail: 'Tải lên ảnh không thành công!',
         life: 3000,
       });
     } finally {
@@ -351,7 +356,7 @@ const onFileChange = async () => {
 const formatSize = (bytes: number) => {
   const k = 1024;
   const dm = 3;
-  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
   if (bytes === 0) {
     return `0 ${sizes[0]}`;
   }
@@ -437,6 +442,39 @@ const removeUploadedImage = (index: number) => {
                 </Message>
               </div>
               <div class="min-w-40">
+                <label for="mo_ta" class="block font-bold mb-3 required"
+                  >Mô tả</label
+                >
+                <Textarea
+                  id="mo_ta"
+                  name="mo_ta"
+                  fluid
+                  placeholder="Nhập mô tả"
+                  row="3"
+                />
+                <Message
+                  v-if="$form.mo_ta?.invalid"
+                  severity="error"
+                  variant="simple"
+                >
+                  {{ $form.mo_ta.error.message }}
+                </Message>
+              </div>
+              <div class="min-w-40">
+                <label class="block font-bold mb-3 required"
+                  >Có nội dung bên trong không?</label
+                >
+                <Select
+                  v-model="isEnabled"
+                  :options="[
+                    { label: 'Có', value: true },
+                    { label: 'Không', value: false },
+                  ]"
+                  option-label="label"
+                  option-value="value"
+                />
+              </div>
+              <div v-if="isEnabled" class="min-w-40">
                 <label for="noi_dung" class="block font-bold mb-3 required"
                   >Nội dung</label
                 >

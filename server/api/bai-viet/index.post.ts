@@ -1,4 +1,8 @@
+import { useAuth } from "~/server/utils/useAuth";
+
 export default defineEventHandler(async (event) => {
+  await useAuth(event);
+  
   const body = await readBody(event);
 
   const baiviet = await useDrizzle()

@@ -1,4 +1,7 @@
-export default defineEventHandler(async () => {
+import { useAuth } from "~/server/utils/useAuth";
+
+export default defineEventHandler(async (event) => {
+  
   const thumucs = await useDrizzle()
     .select()
     .from(tables.thumuc)

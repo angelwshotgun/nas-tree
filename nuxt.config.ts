@@ -33,8 +33,8 @@ export default defineNuxtConfig({
   auth: {
     isEnabled: true,
     disableServerSideAuth: false,
-    baseURL: 'https://nas-tree.nuxt.dev/api/auth',
-    // baseURL: 'http://localhost:3000/api/auth',
+    // baseURL: 'https://nas-tree.nuxt.dev/api/auth',
+    baseURL: 'http://localhost:3000/api/auth',
     provider: {
       type: 'authjs',
       trustHost: false,
