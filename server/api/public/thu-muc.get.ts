@@ -1,5 +1,3 @@
-import { useAuth } from "~/server/utils/useAuth";
-
 export default defineEventHandler(async (event) => {
   
   const thumucs = await useDrizzle()

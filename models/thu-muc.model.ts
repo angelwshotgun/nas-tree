@@ -1,10 +1,18 @@
-class ThuMucModel {
+export interface ThuMucNgonNguModel {
   id?: number;
-  ten_thumuc?: string;
-  thu_tu?: number;
+  thumucId?: number;
+  ten_thumuc: string;
+  ngon_ngu: string;
+  locale: string;
   createdAt?: number;
   updatedAt?: number;
-  duong_dan: string;
 }
 
-export { ThuMucModel };
+export interface ThuMucModel {
+  id?: number;
+  thu_tu: number;
+  duong_dan: string;
+  createdAt?: number;
+  updatedAt?: number;
+  thumuc_ngonngu: ThuMucNgonNguModel[];
+}

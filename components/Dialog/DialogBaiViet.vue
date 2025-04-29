@@ -391,238 +391,245 @@ const removeUploadedImage = (index: number) => {
       :modal="true"
       :close-on-escape="closeEscapeKeyModalInfo"
     >
-      <div>
-        <div class="flex flex-col gap-6">
-          <Form
-            ref="form"
-            v-slot="$form"
-            :initial-values
-            :resolver="resolver"
-            @submit="onSubmit"
-          >
-            <div class="gap-4 flex flex-col">
-              <div class="min-w-40">
-                <label for="thumucId" class="block font-bold mb-3 required"
-                  >Thư mục</label
-                >
-                <Select
-                  id="thumucId"
-                  name="thumucId"
-                  :options="thuMucList"
-                  option-label="ten_thumuc"
-                  option-value="id"
-                  filter
-                  class="w-full"
-                  placeholder="Chọn loại thư mục"
-                />
-                <Message
-                  v-if="$form.thumucId?.invalid"
-                  severity="error"
-                  variant="simple"
-                >
-                  {{ $form.thumucId.error.message }}
-                </Message>
-              </div>
-              <div class="min-w-40">
-                <label for="tieu_de" class="block font-bold mb-3 required"
-                  >Tiêu đề</label
-                >
-                <InputText
-                  id="tieu_de"
-                  name="tieu_de"
-                  fluid
-                  placeholder="Nhập tên tiêu đề"
-                />
-                <Message
-                  v-if="$form.tieu_de?.invalid"
-                  severity="error"
-                  variant="simple"
-                >
-                  {{ $form.tieu_de.error.message }}
-                </Message>
-              </div>
-              <div class="min-w-40">
-                <label for="mo_ta" class="block font-bold mb-3 required"
-                  >Mô tả</label
-                >
-                <Textarea
-                  id="mo_ta"
-                  name="mo_ta"
-                  fluid
-                  placeholder="Nhập mô tả"
-                  row="3"
-                />
-                <Message
-                  v-if="$form.mo_ta?.invalid"
-                  severity="error"
-                  variant="simple"
-                >
-                  {{ $form.mo_ta.error.message }}
-                </Message>
-              </div>
-              <div class="min-w-40">
-                <label class="block font-bold mb-3 required"
-                  >Có nội dung bên trong không?</label
-                >
-                <Select
-                  v-model="isEnabled"
-                  :options="[
-                    { label: 'Có', value: true },
-                    { label: 'Không', value: false },
-                  ]"
-                  option-label="label"
-                  option-value="value"
-                />
-              </div>
-              <div v-if="isEnabled" class="min-w-40">
-                <label for="noi_dung" class="block font-bold mb-3 required"
-                  >Nội dung</label
-                >
-                <Editor
-                  id="noi_dung"
-                  name="noi_dung"
-                  fluid
-                  placeholder="Nhập tên nội dung"
-                />
-                <Message
-                  v-if="$form.noi_dung?.invalid"
-                  severity="error"
-                  variant="simple"
-                >
-                  {{ $form.noi_dung.error.message }}
-                </Message>
-              </div>
-              <div class="min-w-40">
-                <label class="block font-bold mb-3">Ảnh</label>
-                <FileUpload
-                  ref="fileUpload"
-                  v-model="url"
-                  :multiple="true"
-                  :show-upload-button="false"
-                  :max-file-size="104857600"
-                  invalid-file-size-message="Kích thước file quá lớn, vui lòng chọn file khác!"
-                  accept="image/*"
-                  choose-label="Chọn file"
-                  upload-label="Tải lên"
-                  cancel-label="Hủy bỏ"
-                  @change="onFileChange"
-                >
-                  <template
-                    #content="{ files, uploadedFiles, removeFileCallback }"
-                  >
-                    <div
-                      v-if="files.length > 0"
-                      class="flex flex-col gap-4 mb-4"
+      <Tabs value="0">
+        <TabList>
+          <Tab value="0">Tiếng Anh</Tab>
+          <Tab value="1">Tiếng Việt</Tab>
+          <Tab value="2">Tiếng Hàn</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="0">
+            <div class="flex flex-col gap-6">
+              <Form
+                ref="form"
+                v-slot="$form"
+                :initial-values
+                :resolver="resolver"
+                @submit="onSubmit"
+              >
+                <div class="gap-4 flex flex-col">
+                  <div class="min-w-40">
+                    <label for="thumucId" class="block font-bold mb-3 required"
+                      >Thư mục</label
                     >
-                      <div
-                        v-for="(file, index) of files"
-                        :key="file.name + file.type + file.size"
-                        class="p-4 rounded-border flex flex-wrap border border-surface gap-4 items-center w-full"
-                      >
-                        <div class="flex flex-col gap-2">
-                          <span
-                            class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
-                            >{{ file.name }}</span
-                          >
-                          <div>{{ formatSize(file.size) }}</div>
-                        </div>
-                        <Badge
-                          :value="
-                            uploadStatus === 'waiting'
-                              ? 'Chờ đợi'
-                              : uploadStatus === 'uploading'
-                              ? 'Đang tải lên'
-                              : uploadStatus === 'success'
-                              ? 'Thành công'
-                              : 'Lỗi'
-                          "
-                          :severity="
-                            uploadStatus === 'waiting'
-                              ? 'warn'
-                              : uploadStatus === 'uploading'
-                              ? 'info'
-                              : uploadStatus === 'success'
-                              ? 'success'
-                              : 'danger'
-                          "
-                        />
-                        <div class="ml-auto">
-                          <Button
-                            icon="pi pi-times"
-                            outlined
-                            rounded
-                            severity="danger"
-                            @click="removeFileCallback(index)"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      v-if="uploadedFiles.length > 0"
-                      class="flex flex-col gap-4"
+                    <Select
+                      id="thumucId"
+                      name="thumucId"
+                      :options="thuMucList"
+                      option-label="ten_thumuc"
+                      option-value="id"
+                      filter
+                      class="w-full"
+                      placeholder="Chọn loại thư mục"
+                    />
+                    <Message
+                      v-if="$form.thumucId?.invalid"
+                      severity="error"
+                      variant="simple"
                     >
-                      <div
-                        v-for="(file, index) of uploadedFiles"
-                        :key="file.name + file.type + file.size"
-                        class="p-4 rounded-border flex flex-wrap border border-surface gap-4 items-center w-full"
+                      {{ $form.thumucId.error.message }}
+                    </Message>
+                  </div>
+                  <div class="min-w-40">
+                    <label for="tieu_de" class="block font-bold mb-3 required"
+                      >Tiêu đề</label
+                    >
+                    <InputText
+                      id="tieu_de"
+                      name="tieu_de"
+                      fluid
+                      placeholder="Nhập tên tiêu đề"
+                    />
+                    <Message
+                      v-if="$form.tieu_de?.invalid"
+                      severity="error"
+                      variant="simple"
+                    >
+                      {{ $form.tieu_de.error.message }}
+                    </Message>
+                  </div>
+                  <div class="min-w-40">
+                    <label for="mo_ta" class="block font-bold mb-3 required"
+                      >Mô tả</label
+                    >
+                    <Textarea
+                      id="mo_ta"
+                      name="mo_ta"
+                      fluid
+                      placeholder="Nhập mô tả"
+                      row="3"
+                    />
+                    <Message
+                      v-if="$form.mo_ta?.invalid"
+                      severity="error"
+                      variant="simple"
+                    >
+                      {{ $form.mo_ta.error.message }}
+                    </Message>
+                  </div>
+                  <div class="min-w-40">
+                    <label class="block font-bold mb-3 required"
+                      >Có nội dung bên trong không?</label
+                    >
+                    <Select
+                      v-model="isEnabled"
+                      :options="[
+                        { label: 'Có', value: true },
+                        { label: 'Không', value: false },
+                      ]"
+                      option-label="label"
+                      option-value="value"
+                    />
+                  </div>
+                  <div v-if="isEnabled" class="min-w-40">
+                    <label for="noi_dung" class="block font-bold mb-3 required"
+                      >Nội dung</label
+                    >
+                    <Editor
+                      id="noi_dung"
+                      name="noi_dung"
+                      fluid
+                      placeholder="Nhập tên nội dung"
+                    />
+                    <Message
+                      v-if="$form.noi_dung?.invalid"
+                      severity="error"
+                      variant="simple"
+                    >
+                      {{ $form.noi_dung.error.message }}
+                    </Message>
+                  </div>
+                  <div class="min-w-40">
+                    <label class="block font-bold mb-3">Ảnh</label>
+                    <FileUpload
+                      ref="fileUpload"
+                      v-model="url"
+                      :multiple="true"
+                      :show-upload-button="false"
+                      :max-file-size="104857600"
+                      invalid-file-size-message="Kích thước file quá lớn, vui lòng chọn file khác!"
+                      accept="image/*"
+                      choose-label="Chọn file"
+                      upload-label="Tải lên"
+                      cancel-label="Hủy bỏ"
+                      @change="onFileChange"
+                    >
+                      <template
+                        #content="{ files, uploadedFiles, removeFileCallback }"
                       >
-                        <div class="flex flex-col gap-2">
-                          <span
-                            class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
-                            >{{ file.name }}</span
-                          >
-                          <div>{{ formatSize(file.size) }}</div>
-                        </div>
-                        <Badge value="Thành công" severity="success" />
-                        <div class="ml-auto">
-                          <Button
-                            icon="pi pi-times"
-                            outlined
-                            rounded
-                            severity="danger"
-                            @click="onRemoveFile(index)"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Display uploaded images -->
-                    <div v-if="uploadedImageUrls.length > 0" class="mt-4">
-                      <h3 class="font-bold mb-2">Ảnh đã tải lên</h3>
-                      <div class="grid grid-cols-3 gap-4">
                         <div
-                          v-for="(url, index) in uploadedImageUrls"
-                          :key="index"
-                          class="relative"
+                          v-if="files.length > 0"
+                          class="flex flex-col gap-4 mb-4"
                         >
-                          <img
-                            :src="url"
-                            alt="Uploaded"
-                            class="w-full h-32 object-cover rounded"
-                          />
-                          <Button
-                            icon="pi pi-times"
-                            class="absolute top-1 right-1"
-                            size="small"
-                            rounded
-                            severity="danger"
-                            @click="removeUploadedImage(index)"
-                          />
+                          <div
+                            v-for="(file, index) of files"
+                            :key="file.name + file.type + file.size"
+                            class="p-4 rounded-border flex flex-wrap border border-surface gap-4 items-center w-full"
+                          >
+                            <div class="flex flex-col gap-2">
+                              <span
+                                class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
+                                >{{ file.name }}</span
+                              >
+                              <div>{{ formatSize(file.size) }}</div>
+                            </div>
+                            <Badge
+                              :value="
+                                uploadStatus === 'waiting'
+                                  ? 'Chờ đợi'
+                                  : uploadStatus === 'uploading'
+                                  ? 'Đang tải lên'
+                                  : uploadStatus === 'success'
+                                  ? 'Thành công'
+                                  : 'Lỗi'
+                              "
+                              :severity="
+                                uploadStatus === 'waiting'
+                                  ? 'warn'
+                                  : uploadStatus === 'uploading'
+                                  ? 'info'
+                                  : uploadStatus === 'success'
+                                  ? 'success'
+                                  : 'danger'
+                              "
+                            />
+                            <div class="ml-auto">
+                              <Button
+                                icon="pi pi-times"
+                                outlined
+                                rounded
+                                severity="danger"
+                                @click="removeFileCallback(index)"
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </template>
-                  <template #empty>
-                    <div class="flex items-center justify-center flex-col">
-                      <i
-                        class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
-                      />
-                      <p class="mt-6 mb-0">Kéo và thả các file ảnh</p>
-                    </div>
-                  </template>
-                </FileUpload>
-                <!-- Show uploaded image URLs as JSON -->
-                <!-- <div v-if="uploadedImageUrls.length > 0" class="mt-4">
+                        <div
+                          v-if="uploadedFiles.length > 0"
+                          class="flex flex-col gap-4"
+                        >
+                          <div
+                            v-for="(file, index) of uploadedFiles"
+                            :key="file.name + file.type + file.size"
+                            class="p-4 rounded-border flex flex-wrap border border-surface gap-4 items-center w-full"
+                          >
+                            <div class="flex flex-col gap-2">
+                              <span
+                                class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
+                                >{{ file.name }}</span
+                              >
+                              <div>{{ formatSize(file.size) }}</div>
+                            </div>
+                            <Badge value="Thành công" severity="success" />
+                            <div class="ml-auto">
+                              <Button
+                                icon="pi pi-times"
+                                outlined
+                                rounded
+                                severity="danger"
+                                @click="onRemoveFile(index)"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Display uploaded images -->
+                        <div v-if="uploadedImageUrls.length > 0" class="mt-4">
+                          <h3 class="font-bold mb-2">Ảnh đã tải lên</h3>
+                          <div class="grid grid-cols-3 gap-4">
+                            <div
+                              v-for="(url, index) in uploadedImageUrls"
+                              :key="index"
+                              class="relative"
+                            >
+                              <img
+                                :src="url"
+                                alt="Uploaded"
+                                class="w-full h-32 object-cover rounded"
+                              />
+                              <Button
+                                icon="pi pi-times"
+                                class="absolute top-1 right-1"
+                                size="small"
+                                rounded
+                                severity="danger"
+                                @click="removeUploadedImage(index)"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                      <template #empty>
+                        <div class="flex items-center justify-center flex-col">
+                          <i
+                            class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
+                          />
+                          <p class="mt-6 mb-0">Kéo và thả các file ảnh</p>
+                        </div>
+                      </template>
+                    </FileUpload>
+                    <!-- Show uploaded image URLs as JSON -->
+                    <!-- <div v-if="uploadedImageUrls.length > 0" class="mt-4">
                   <label class="block font-bold mb-2">URLs ảnh (JSON)</label>
                   <textarea 
                     readonly 
@@ -630,40 +637,64 @@ const removeUploadedImage = (index: number) => {
                     rows="3"
                   >{{ JSON.stringify(uploadedImageUrls) }}</textarea>
                 </div> -->
-              </div>
-              <div class="min-w-40">
-                <label for="vi_tri" class="block font-bold mb-3 required"
-                  >Link địa chỉ</label
-                >
-                <InputText
-                  id="vi_tri"
-                  name="vi_tri"
-                  fluid
-                  placeholder="Nhập link địa chỉ"
-                  class="mb-3"
-                />
-                <Message
-                  v-if="$form.vi_tri?.invalid"
-                  severity="error"
-                  variant="simple"
-                >
-                  {{ $form.vi_tri.error.message }}
-                </Message>
-                <iframe
-                  width="100%"
-                  height="400"
-                  style="border: 0"
-                  loading="lazy"
-                  allowfullscreen
-                  referrerpolicy="no-referrer-when-downgrade"
-                  src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDL4CxJZa3H9YO_wBOS6htKE2GU7SfSNyA&q=Hanoi"
-                >
-                </iframe>
-              </div>
+                  </div>
+                  <div class="min-w-40">
+                    <label for="vi_tri" class="block font-bold mb-3 required"
+                      >Link địa chỉ</label
+                    >
+                    <InputText
+                      id="vi_tri"
+                      name="vi_tri"
+                      fluid
+                      placeholder="Nhập link địa chỉ"
+                      class="mb-3"
+                    />
+                    <Message
+                      v-if="$form.vi_tri?.invalid"
+                      severity="error"
+                      variant="simple"
+                    >
+                      {{ $form.vi_tri.error.message }}
+                    </Message>
+                    <iframe
+                      width="100%"
+                      height="400"
+                      style="border: 0"
+                      loading="lazy"
+                      allowfullscreen
+                      referrerpolicy="no-referrer-when-downgrade"
+                      src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDL4CxJZa3H9YO_wBOS6htKE2GU7SfSNyA&q=Hanoi"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+              </Form>
             </div>
-          </Form>
-        </div>
-      </div>
+          </TabPanel>
+          <TabPanel value="1">
+            <p class="m-0">
+              Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+              accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
+              quae ab illo inventore veritatis et quasi architecto beatae vitae
+              dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
+              aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
+              eos qui ratione voluptatem sequi nesciunt. Consectetur, adipisci
+              velit, sed quia non numquam eius modi.
+            </p>
+          </TabPanel>
+          <TabPanel value="2">
+            <p class="m-0">
+              At vero eos et accusamus et iusto odio dignissimos ducimus qui
+              blanditiis praesentium voluptatum deleniti atque corrupti quos
+              dolores et quas molestias excepturi sint occaecati cupiditate non
+              provident, similique sunt in culpa qui officia deserunt mollitia
+              animi, id est laborum et dolorum fuga. Et harum quidem rerum
+              facilis est et expedita distinctio. Nam libero tempore, cum soluta
+              nobis est eligendi optio cumque nihil impedit quo minus.
+            </p>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
       <template #footer>
         <Button
           type="button"

@@ -1,33 +1,21 @@
 import type { ThuMucModel } from '~/models/thu-muc.model';
+
 class _ThuMucService {
   async GetThuMuc() {
-    const response = await $api<ThuMucModel[]>('/api/thu-muc', {
-      method: 'GET',
-    });
-    if (response) {
-      return response;
-    }
-    return [];
+    return (await $api<ThuMucModel[]>('/api/thu-muc', { method: 'GET' })) ?? [];
   }
-  
+
   async GetThuMucPublic() {
-    const response = await $api<ThuMucModel[]>('/api/public/thu-muc', {
-      method: 'GET',
-    });
-    if (response) {
-      return response;
-    }
-    return [];
+    return (
+      (await $api<ThuMucModel[]>('/api/public/thu-muc', { method: 'GET' })) ??
+      []
+    );
   }
 
   async GetThuMucByIdPublic(id: number) {
-    const response = await $api<ThuMucModel>(`/api/public/thu-muc/${id}`, {
+    return await $api<ThuMucModel>(`/api/public/thu-muc/${id}`, {
       method: 'GET',
     });
-    if (response) {
-      return response;
-    }
-    return undefined;
   }
 
   async Insert(entity: ThuMucModel) {
@@ -35,10 +23,7 @@ class _ThuMucService {
       method: 'POST',
       body: entity,
     });
-    if (res) {
-      return res;
-    }
-    return null;
+    return res ?? null;
   }
 
   async Update(entity: ThuMucModel) {
@@ -46,10 +31,7 @@ class _ThuMucService {
       method: 'PATCH',
       body: entity,
     });
-    if (res) {
-      return res;
-    }
-    return null;
+    return res ?? null;
   }
 
   async Delete(entity: ThuMucModel) {
@@ -57,10 +39,7 @@ class _ThuMucService {
       method: `DELETE`,
       body: entity,
     });
-    if (res) {
-      return res;
-    }
-    return null;
+    return res ?? null;
   }
 }
 
