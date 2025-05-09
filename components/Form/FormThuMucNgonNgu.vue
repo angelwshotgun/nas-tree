@@ -1,22 +1,30 @@
 <script setup lang="ts">
-defineProps<{
-  modelValue: string;
-  label: string;
-}>();
+defineProps({
+  modelValue: {
+    type: String,
+    default: '',
+  },
+  label: {
+    type: String,
+    required: true,
+  },
+  placeholder: {
+    type: String,
+    default: 'Nhập tên thư mục',
+  },
+});
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void;
-}>();
+const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
+  <div class="mb-3">
     <label class="font-bold required">{{ label }}</label>
     <InputText
-      :modelValue="modelValue"
-      @update:modelValue="emit('update:modelValue', $event)"
-      placeholder="Nhập tên thư mục"
-      fluid
+      :model-value="modelValue"
+      @update:model-value="(val) => emit('update:modelValue', val)"
+      :placeholder="placeholder"
+      class="w-full"
     />
   </div>
 </template>

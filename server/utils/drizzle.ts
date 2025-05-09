@@ -15,3 +15,5 @@ export type verificationTokens = typeof schema.verificationTokens.$inferSelect;
 export type Sessions = typeof schema.sessions.$inferSelect;
 export type ThuMuc = typeof schema.thumuc.$inferSelect;
 export type BaiViet = typeof schema.baiviet.$inferSelect;
+export type ThuMucNgonNgu = typeof schema.thumuc_ngonngu.$inferSelect;
+export type BaiVietNgonNgu = typeof schema.baiviet_ngonngu.$inferSelect;

@@ -1,4 +1,12 @@
 import type { ThuMucModel } from "./thu-muc.model";
+class BaiVietNgonNguModel {
+  id?: number;
+  tieu_de?: string;
+  mo_ta?: string;
+  noi_dung?: string;
+  ngon_ngu?: string;
+  locale?: string;
+}
 
 class BaiVietModel {
   id?: number;
@@ -12,6 +20,7 @@ class BaiVietModel {
   createdAt?: number;
   updatedAt?: number;
   thumuc?: ThuMucModel;
+  baiviet_ngonngu?: BaiVietNgonNguModel[];
 }
 
-export { BaiVietModel };
+export { BaiVietModel, BaiVietNgonNguModel };

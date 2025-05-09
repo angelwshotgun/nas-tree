@@ -13,7 +13,7 @@
           <InputText
             v-model="searchQuery"
             class="w-full"
-            placeholder="Tìm kiếm"
+            :placeholder="$t('search_placeholder')"
             @click="showDataView = true"
             @focus="showDataView = true"
           />
@@ -52,11 +52,25 @@
 
             <template #empty>
               <div class="p-4 text-center text-gray-500">
-                Nhập từ khóa để tìm kiếm
+                {{ $t('search_placeholder1') }}
               </div>
             </template>
           </DataView>
         </div>
+      </div>
+
+      <div class="flex justify-end mb-4">
+        <Button
+          v-for="locale in locales"
+          :key="locale.code"
+          class="p-button-text"
+          severity="secondary"
+          @click="
+            setLocale(locale.code);
+          "
+        >
+          {{ locale.name }}
+        </Button>
       </div>
 
       <!-- Menu Items -->
@@ -64,7 +78,7 @@
         <template v-for="item in thuMucList" :key="item.id">
           <Button
             :unstyled="true"
-            :label="item.ten_thumuc"
+            :label="item.thumuc_ngonngu?.find((t) => t.ngon_ngu === locale)?.ten_thumuc || ''"
             class="p-3 text-red-500 bg-amber-100 border-2 border-slate-800 rounded-lg text-3xl"
             @click="navigateTo(`/${item.duong_dan}`)"
           />
@@ -85,6 +99,7 @@ definePageMeta({
   auth: false,
 });
 
+const { locale, locales, setLocale, t } = useI18n();
 const searchQuery = ref('');
 const showDataView = ref(false);
 const searchResults = ref<BaiVietModel[]>([]);
