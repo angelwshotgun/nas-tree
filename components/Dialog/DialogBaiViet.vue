@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { yupResolver } from '@primevue/forms/resolvers/yup';
-import * as yup from 'yup';
-import type { FormSubmitEvent, FormInstance } from '@primevue/forms/form';
-import type { ThuMucModel } from '~/models/thu-muc.model';
-import { ThuMucService } from '~/services/thu-muc.service';
-import type { BaiVietModel } from '~/models/bai-viet.model';
-import { BaiVietService } from '~/services/bai-viet.service';
+import { yupResolver } from "@primevue/forms/resolvers/yup";
+import * as yup from "yup";
+import type { FormSubmitEvent, FormInstance } from "@primevue/forms/form";
+import type { ThuMucModel } from "~/models/thu-muc.model";
+import { ThuMucService } from "~/services/thu-muc.service";
+import type { BaiVietModel } from "~/models/bai-viet.model";
+import { BaiVietService } from "~/services/bai-viet.service";
 import {
   ref as firebaseRef,
   uploadBytes,
   getDownloadURL,
-} from 'firebase/storage';
-import { storage } from '~/plugins/firebase'; // Ensure you have this file set up with Firebase configuration
+} from "firebase/storage";
+import { storage } from "~/plugins/firebase"; // Ensure you have this file set up with Firebase configuration
 
 const isTranslating = ref(false);
 const isMounted = ref(false);
@@ -45,16 +45,16 @@ const internalVisible = computed({
   },
 });
 
-const { data: thuMucList } = useNuxtData('thuMucList');
+const { data: thuMucList } = useNuxtData("thuMucList");
 
 onMounted(async () => {
   if (thuMucList.value) return;
   try {
     const response = await ThuMucService.GetThuMuc();
     thuMucList.value = response;
-    useNuxtData('thuMucList').data.value = response;
+    useNuxtData("thuMucList").data.value = response;
   } catch (error) {
-    console.error('Error fetching thu muc:', error);
+    console.error("Error fetching thu muc:", error);
   }
 });
 
@@ -65,113 +65,60 @@ const resolver = ref(
       tieu_de: yup
         .string()
         .nullable()
-        .required('Vui lòng nhập tiêu đề!')
-        .label('tiêu đề'),
+        .required("Vui lòng nhập tiêu đề!")
+        .label("tiêu đề"),
       mo_ta: yup
         .string()
         .nullable()
-        .required('Vui lòng nhập mô tả!')
-        .label('mô tả'),
-      noi_dung: yup.string().nullable().label('nội dung'),
+        .required("Vui lòng nhập mô tả!")
+        .label("mô tả"),
+      noi_dung: yup.string().nullable().label("nội dung"),
       thumucId: yup
         .number()
         .nullable()
-        .required('Vui lòng nhập thể loại!')
-        .label('thể loại'),
+        .required("Vui lòng nhập thể loại!")
+        .label("thể loại"),
       vi_tri: yup
         .string()
         .nullable()
-        .required('Vui lòng nhập vị trí!')
-        .label('vị trí'),
+        .required("Vui lòng nhập vị trí!")
+        .label("vị trí"),
     })
   )
 );
 
-const initialValues = ref<{
-  id: number;
-  tieu_de: string;
-  mo_ta: string;
-  noi_dung: string;
-  anh: string;
-  vi_tri: string;
-  thumucId: number | null;
-  createdAt: number | null;
-  updatedAt: number | null;
-  baiviet_ngonngu: {
-    ten_tieu_de: string;
-    mo_ta: string;
-    noi_dung: string;
-    ngon_ngu: string;
-    locale: string;
-  }[];
-}>({
+const initialValues = ref<BaiVietModel>({
   id: 0,
-  tieu_de: '',
-  mo_ta: '',
-  noi_dung: '',
-  anh: '',
-  vi_tri: '',
-  thumucId: null,
-  createdAt: null,
-  updatedAt: null,
+  anh: "",
+  vi_tri: "",
+  createdAt: 0,
+  updatedAt: 0,
   baiviet_ngonngu: [
-    {
-      ten_tieu_de: '',
-      mo_ta: '',
-      noi_dung: '',
-      ngon_ngu: 'en',
-      locale: 'en-US',
-    },
-    {
-      ten_tieu_de: '',
-      mo_ta: '',
-      noi_dung: '',
-      ngon_ngu: 'ko',
-      locale: 'ko-KR',
-    },
-    {
-      ten_tieu_de: '',
-      mo_ta: '',
-      noi_dung: '',
-      ngon_ngu: 'fr',
-      locale: 'fr-FR',
-    },
-    {
-      ten_tieu_de: '',
-      mo_ta: '',
-      noi_dung: '',
-      ngon_ngu: 'ja',
-      locale: 'ja-JP',
-    },
-    {
-      ten_tieu_de: '',
-      mo_ta: '',
-      noi_dung: '',
-      ngon_ngu: 'es',
-      locale: 'es-ES',
-    },
-    {
-      ten_tieu_de: '',
-      mo_ta: '',
-      noi_dung: '',
-      ngon_ngu: 'th',
-      locale: 'th-TH',
-    },
+    { tieu_de: "", mo_ta: "", noi_dung: "", ngon_ngu: "en", locale: "en-US" },
+    { tieu_de: "", mo_ta: "", noi_dung: "", ngon_ngu: "ko", locale: "ko-KR" },
+    { tieu_de: "", mo_ta: "", noi_dung: "", ngon_ngu: "fr", locale: "fr-FR" },
+    { tieu_de: "", mo_ta: "", noi_dung: "", ngon_ngu: "ja", locale: "ja-JP" },
+    { tieu_de: "", mo_ta: "", noi_dung: "", ngon_ngu: "es", locale: "es-ES" },
+    { tieu_de: "", mo_ta: "", noi_dung: "", ngon_ngu: "th", locale: "th-TH" },
   ],
 });
 
 const translateWithGenAI = async () => {
-  const englishTitle = initialValues.value.tieu_de.trim();
-  const englishDesc = initialValues.value.mo_ta.trim();
+  const englishTitle =
+    initialValues.value.baiviet_ngonngu[0].ten_tieu_de.trim();
+  const englishDesc = initialValues.value.baiviet_ngonngu[0].mo_ta.trim();
+  console.log(initialValues.value.baiviet_ngonngu[0].noi_dung);
   const englishContent = isEnabled.value
-    ? initialValues.value.noi_dung.replace(/<[^>]*>/g, ' ').trim()
-    : '';
+    ? initialValues.value.baiviet_ngonngu[0].noi_dung
+        .replace(/<[^>]*>/g, " ")
+        .trim()
+    : "";
 
   if (!englishTitle) {
     toast.add({
-      severity: 'warn',
-      summary: 'Cảnh báo',
-      detail: 'Vui lòng nhập tiêu đề tiếng Anh trước!',
+      severity: "warn",
+      summary: "Cảnh báo",
+      detail: "Vui lòng nhập tiêu đề tiếng Anh trước!",
       life: 3000,
     });
     return;
@@ -181,34 +128,36 @@ const translateWithGenAI = async () => {
     isTranslating.value = true;
 
     // Gọi API dịch cho tiêu đề
-    const responseTitle = await $fetch('/api/translate', {
-      method: 'POST',
+    const responseTitle = await $fetch("/api/translate", {
+      method: "POST",
       body: {
         text: englishTitle,
-        targetLanguages: ['ko', 'fr', 'ja', 'es', 'th'],
+        targetLanguages: ["ko", "fr", "ja", "es", "th"],
       },
     });
 
     // Gọi API dịch cho mô tả nếu có
     let responseDesc = null;
     if (englishDesc) {
-      responseDesc = await $fetch('/api/translate', {
-        method: 'POST',
+      responseDesc = await $fetch("/api/translate", {
+        method: "POST",
         body: {
           text: englishDesc,
-          targetLanguages: ['ko', 'fr', 'ja', 'es', 'th'],
+          targetLanguages: ["ko", "fr", "ja", "es", "th"],
         },
       });
     }
 
     // Gọi API dịch cho nội dung nếu có và đã kích hoạt
+    console.log("isEnabled.value:", isEnabled.value);
+    console.log("englishContent:", englishContent);
     let responseContent = null;
     if (englishContent && isEnabled.value) {
-      responseContent = await $fetch('/api/translate', {
-        method: 'POST',
+      responseContent = await $fetch("/api/translate", {
+        method: "POST",
         body: {
           text: englishContent,
-          targetLanguages: ['ko', 'fr', 'ja', 'es', 'th'],
+          targetLanguages: ["ko", "fr", "ja", "es", "th"],
         },
       });
     }
@@ -246,9 +195,9 @@ const translateWithGenAI = async () => {
       }
 
       toast.add({
-        severity: 'success',
-        summary: 'Thành công',
-        detail: 'Dịch tự động tiêu đề hoàn tất!',
+        severity: "success",
+        summary: "Thành công",
+        detail: "Dịch tự động tiêu đề hoàn tất!",
         life: 3000,
       });
     }
@@ -286,9 +235,9 @@ const translateWithGenAI = async () => {
       }
 
       toast.add({
-        severity: 'success',
-        summary: 'Thành công',
-        detail: 'Dịch tự động mô tả hoàn tất!',
+        severity: "success",
+        summary: "Thành công",
+        detail: "Dịch tự động mô tả hoàn tất!",
         life: 3000,
       });
     }
@@ -324,19 +273,19 @@ const translateWithGenAI = async () => {
       }
 
       toast.add({
-        severity: 'success',
-        summary: 'Thành công',
+        severity: "success",
+        summary: "Thành công",
         detail:
-          'Dịch tự động nội dung hoàn tất! Lưu ý: Định dạng HTML không được giữ nguyên.',
+          "Dịch tự động nội dung hoàn tất! Lưu ý: Định dạng HTML không được giữ nguyên.",
         life: 5000,
       });
     }
   } catch (error) {
-    console.error('Lỗi dịch tự động:', error);
+    console.error("Lỗi dịch tự động:", error);
     toast.add({
-      severity: 'error',
-      summary: 'Lỗi',
-      detail: 'Không thể dịch tự động!',
+      severity: "error",
+      summary: "Lỗi",
+      detail: "Không thể dịch tự động!",
       life: 3000,
     });
   } finally {
@@ -350,7 +299,7 @@ const onSubmit = (e: FormSubmitEvent) => {
     const baivietNgonNgu = initialValues.value.baiviet_ngonngu.map((item) => ({
       tieu_de: item.ten_tieu_de,
       mo_ta: item.mo_ta,
-      noi_dung: item.noi_dung?.replace(/&nbsp;/g, ' ') || '',
+      noi_dung: item.noi_dung?.replace(/&nbsp;/g, " ") || "",
       ngon_ngu: item.ngon_ngu,
       locale: item.locale,
     }));
@@ -359,7 +308,7 @@ const onSubmit = (e: FormSubmitEvent) => {
       id: initialValues.value.id,
       tieu_de: e.values.tieu_de,
       mo_ta: e.values.mo_ta,
-      noi_dung: e.values.noi_dung?.replace(/&nbsp;/g, ' ') || '',
+      noi_dung: e.values.noi_dung?.replace(/&nbsp;/g, " ") || "",
       vi_tri: e.values.vi_tri,
       thumucId: e.values.thumucId,
       anh: JSON.stringify(uploadedImageUrls.value),
@@ -369,17 +318,17 @@ const onSubmit = (e: FormSubmitEvent) => {
     confirm.require({
       message: `${
         BaiVietDTO.id != null && BaiVietDTO.id > 0
-          ? 'Bạn có chắc muốn cập nhật thông tin này?'
-          : 'Bạn có chắc muốn thêm thông tin này?'
+          ? "Bạn có chắc muốn cập nhật thông tin này?"
+          : "Bạn có chắc muốn thêm thông tin này?"
       }`,
-      icon: 'pi pi-question-circle',
+      icon: "pi pi-question-circle",
       rejectProps: {
-        label: 'Hủy',
-        severity: 'secondary',
+        label: "Hủy",
+        severity: "secondary",
         outlined: true,
       },
       acceptProps: {
-        label: 'Xác nhận',
+        label: "Xác nhận",
       },
       accept: () => {
         if (BaiVietDTO.id != null && BaiVietDTO.id > 0) {
@@ -387,19 +336,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: 'success',
-                  summary: 'Thành công',
-                  detail: 'Cập nhật thông tin thành công!',
+                  severity: "success",
+                  summary: "Thành công",
+                  detail: "Cập nhật thông tin thành công!",
                   life: 3000,
                 });
                 e.reset();
-                emit('reloadDataTable');
+                emit("reloadDataTable");
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: 'error',
-                  summary: 'Thất bại',
-                  detail: 'Cập nhật thông tin không thành công!',
+                  severity: "error",
+                  summary: "Thất bại",
+                  detail: "Cập nhật thông tin không thành công!",
                   life: 3000,
                 });
                 e.reset();
@@ -408,9 +357,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: 'error',
-                summary: 'Lỗi',
-                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
+                severity: "error",
+                summary: "Lỗi",
+                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
                 life: 3000,
               });
               e.reset();
@@ -421,19 +370,19 @@ const onSubmit = (e: FormSubmitEvent) => {
             .then((response) => {
               if (response) {
                 toast.add({
-                  severity: 'success',
-                  summary: 'Thành công',
-                  detail: 'Thêm mới thông tin thành công!',
+                  severity: "success",
+                  summary: "Thành công",
+                  detail: "Thêm mới thông tin thành công!",
                   life: 3000,
                 });
                 e.reset();
-                emit('reloadDataTable');
+                emit("reloadDataTable");
                 handleHideModal();
               } else {
                 toast.add({
-                  severity: 'error',
-                  summary: 'Thất bại',
-                  detail: 'Thêm mới thông tin không thành công!',
+                  severity: "error",
+                  summary: "Thất bại",
+                  detail: "Thêm mới thông tin không thành công!",
                   life: 3000,
                 });
                 e.reset();
@@ -442,9 +391,9 @@ const onSubmit = (e: FormSubmitEvent) => {
             })
             .catch(() => {
               toast.add({
-                severity: 'error',
-                summary: 'Lỗi',
-                detail: 'Đã có lỗi xảy ra, vui lòng thử lại!',
+                severity: "error",
+                summary: "Lỗi",
+                detail: "Đã có lỗi xảy ra, vui lòng thử lại!",
                 life: 3000,
               });
               e.reset();
@@ -459,17 +408,17 @@ const onSubmit = (e: FormSubmitEvent) => {
 
 watchEffect(() => {
   if (props.baiViet?.id != undefined) {
-    if (props.baiViet?.noi_dung !== '<p> </p>') {
+    if (props.baiViet?.noi_dung !== "<p> </p>") {
       isEnabled.value = true;
-      form.value?.setFieldValue('noi_dung', props.baiViet?.noi_dung);
+      form.value?.setFieldValue("noi_dung", props.baiViet?.noi_dung);
     }
     initialValues.value.id = props.baiViet?.id;
-    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? '';
-    initialValues.value.mo_ta = props.baiViet?.mo_ta ?? '';
-    initialValues.value.noi_dung = props.baiViet?.noi_dung ?? '';
-    initialValues.value.vi_tri = props.baiViet?.vi_tri ?? '';
+    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? "";
+    initialValues.value.mo_ta = props.baiViet?.mo_ta ?? "";
+    initialValues.value.noi_dung = props.baiViet?.noi_dung ?? "";
+    initialValues.value.vi_tri = props.baiViet?.vi_tri ?? "";
     initialValues.value.thumucId = props.baiViet?.thumucId ?? null;
-    initialValues.value.anh = props.baiViet?.anh ?? '';
+    initialValues.value.anh = props.baiViet?.anh ?? "";
     initialValues.value.createdAt = props.baiViet?.createdAt ?? null;
     initialValues.value.updatedAt = props.baiViet?.updatedAt ?? null;
 
@@ -477,7 +426,7 @@ watchEffect(() => {
       try {
         uploadedImageUrls.value = JSON.parse(props.baiViet.anh);
       } catch (error) {
-        console.error('Error parsing image URLs:', error);
+        console.error("Error parsing image URLs:", error);
         uploadedImageUrls.value = [];
       }
     }
@@ -490,46 +439,46 @@ watchEffect(() => {
       // Tạo mảng ngôn ngữ chuẩn
       let standardNgonNgu = [
         {
-          ten_tieu_de: '',
-          mo_ta: '',
-          noi_dung: '',
-          ngon_ngu: 'en',
-          locale: 'en-US',
+          ten_tieu_de: "",
+          mo_ta: "",
+          noi_dung: "",
+          ngon_ngu: "en",
+          locale: "en-US",
         },
         {
-          ten_tieu_de: '',
-          mo_ta: '',
-          noi_dung: '',
-          ngon_ngu: 'ko',
-          locale: 'ko-KR',
+          ten_tieu_de: "",
+          mo_ta: "",
+          noi_dung: "",
+          ngon_ngu: "ko",
+          locale: "ko-KR",
         },
         {
-          ten_tieu_de: '',
-          mo_ta: '',
-          noi_dung: '',
-          ngon_ngu: 'fr',
-          locale: 'fr-FR',
+          ten_tieu_de: "",
+          mo_ta: "",
+          noi_dung: "",
+          ngon_ngu: "fr",
+          locale: "fr-FR",
         },
         {
-          ten_tieu_de: '',
-          mo_ta: '',
-          noi_dung: '',
-          ngon_ngu: 'ja',
-          locale: 'ja-JP',
+          ten_tieu_de: "",
+          mo_ta: "",
+          noi_dung: "",
+          ngon_ngu: "ja",
+          locale: "ja-JP",
         },
         {
-          ten_tieu_de: '',
-          mo_ta: '',
-          noi_dung: '',
-          ngon_ngu: 'es',
-          locale: 'es-ES',
+          ten_tieu_de: "",
+          mo_ta: "",
+          noi_dung: "",
+          ngon_ngu: "es",
+          locale: "es-ES",
         },
         {
-          ten_tieu_de: '',
-          mo_ta: '',
-          noi_dung: '',
-          ngon_ngu: 'th',
-          locale: 'th-TH',
+          ten_tieu_de: "",
+          mo_ta: "",
+          noi_dung: "",
+          ngon_ngu: "th",
+          locale: "th-TH",
         },
       ];
 
@@ -540,9 +489,9 @@ watchEffect(() => {
         );
         if (index !== -1) {
           standardNgonNgu[index] = {
-            ten_tieu_de: ngonNgu.tieu_de || '',
-            mo_ta: ngonNgu.mo_ta || '',
-            noi_dung: ngonNgu.noi_dung || '',
+            ten_tieu_de: ngonNgu.tieu_de || "",
+            mo_ta: ngonNgu.mo_ta || "",
+            noi_dung: ngonNgu.noi_dung || "",
             ngon_ngu: ngonNgu.ngon_ngu,
             locale: ngonNgu.locale,
           };
@@ -568,8 +517,8 @@ watch(
   () => isEnabled,
   () => {
     if (isEnabled.value === false) {
-      initialValues.value.noi_dung = '<p> </p>';
-      form.value?.setFieldValue('noi_dung', '<p> </p>');
+      initialValues.value.noi_dung = "<p> </p>";
+      form.value?.setFieldValue("noi_dung", "<p> </p>");
     }
   },
   { immediate: true }
@@ -579,73 +528,73 @@ onMounted(async () => {
   isMounted.value = true;
 });
 
-const emit = defineEmits(['hideModal', 'reloadDataTable']);
+const emit = defineEmits(["hideModal", "reloadDataTable"]);
 
 const handleHideModal = () => {
   initialValues.value = {
     id: 0,
-    tieu_de: '',
-    mo_ta: '',
-    noi_dung: '',
-    anh: '',
-    vi_tri: '',
+    tieu_de: "",
+    mo_ta: "",
+    noi_dung: "",
+    anh: "",
+    vi_tri: "",
     thumucId: null,
     createdAt: null,
     updatedAt: null,
     baiviet_ngonngu: [
       {
-        ten_tieu_de: '',
-        mo_ta: '',
-        noi_dung: '',
-        ngon_ngu: 'en',
-        locale: 'en-US',
+        ten_tieu_de: "",
+        mo_ta: "",
+        noi_dung: "",
+        ngon_ngu: "en",
+        locale: "en-US",
       },
       {
-        ten_tieu_de: '',
-        mo_ta: '',
-        noi_dung: '',
-        ngon_ngu: 'ko',
-        locale: 'ko-KR',
+        ten_tieu_de: "",
+        mo_ta: "",
+        noi_dung: "",
+        ngon_ngu: "ko",
+        locale: "ko-KR",
       },
       {
-        ten_tieu_de: '',
-        mo_ta: '',
-        noi_dung: '',
-        ngon_ngu: 'fr',
-        locale: 'fr-FR',
+        ten_tieu_de: "",
+        mo_ta: "",
+        noi_dung: "",
+        ngon_ngu: "fr",
+        locale: "fr-FR",
       },
       {
-        ten_tieu_de: '',
-        mo_ta: '',
-        noi_dung: '',
-        ngon_ngu: 'ja',
-        locale: 'ja-JP',
+        ten_tieu_de: "",
+        mo_ta: "",
+        noi_dung: "",
+        ngon_ngu: "ja",
+        locale: "ja-JP",
       },
       {
-        ten_tieu_de: '',
-        mo_ta: '',
-        noi_dung: '',
-        ngon_ngu: 'es',
-        locale: 'es-ES',
+        ten_tieu_de: "",
+        mo_ta: "",
+        noi_dung: "",
+        ngon_ngu: "es",
+        locale: "es-ES",
       },
       {
-        ten_tieu_de: '',
-        mo_ta: '',
-        noi_dung: '',
-        ngon_ngu: 'th',
-        locale: 'th-TH',
+        ten_tieu_de: "",
+        mo_ta: "",
+        noi_dung: "",
+        ngon_ngu: "th",
+        locale: "th-TH",
       },
     ],
   };
   uploadedImageUrls.value = [];
-  emit('hideModal');
+  emit("hideModal");
 };
 
 const url = ref();
 const fileUpload = ref();
 const isLoading = ref(false);
-const uploadStatus = ref<'waiting' | 'uploading' | 'success' | 'error'>(
-  'waiting'
+const uploadStatus = ref<"waiting" | "uploading" | "success" | "error">(
+  "waiting"
 );
 const uploadProgress = ref<{ [key: string]: number }>({});
 
@@ -659,13 +608,13 @@ const uploadToFirebase = async (file: File): Promise<string> => {
     const downloadURL = await getDownloadURL(snapshot.ref);
     return downloadURL;
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error("Error uploading file:", error);
     throw error;
   }
 };
 
 const onFileChange = async () => {
-  uploadStatus.value = 'uploading';
+  uploadStatus.value = "uploading";
   isLoading.value = true;
   isUploading.value = true;
 
@@ -675,7 +624,7 @@ const onFileChange = async () => {
     try {
       const uploadPromises = Array.from(files).map(async (file: unknown) => {
         if (!(file instanceof File)) {
-          throw new Error('Invalid file type');
+          throw new Error("Invalid file type");
         }
 
         uploadProgress.value[file.name] = 0;
@@ -691,20 +640,20 @@ const onFileChange = async () => {
 
       uploadedImageUrls.value = [...uploadedImageUrls.value, ...urls];
 
-      uploadStatus.value = 'success';
+      uploadStatus.value = "success";
       toast.add({
-        severity: 'success',
-        summary: 'Thành công',
-        detail: 'Tải lên ảnh thành công!',
+        severity: "success",
+        summary: "Thành công",
+        detail: "Tải lên ảnh thành công!",
         life: 3000,
       });
     } catch (error) {
-      console.error('Error uploading files:', error);
-      uploadStatus.value = 'error';
+      console.error("Error uploading files:", error);
+      uploadStatus.value = "error";
       toast.add({
-        severity: 'error',
-        summary: 'Lỗi',
-        detail: 'Tải lên ảnh không thành công!',
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Tải lên ảnh không thành công!",
         life: 3000,
       });
     } finally {
@@ -717,7 +666,7 @@ const onFileChange = async () => {
 const formatSize = (bytes: number) => {
   const k = 1024;
   const dm = 3;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   if (bytes === 0) {
     return `0 ${sizes[0]}`;
   }
@@ -772,43 +721,11 @@ const removeUploadedImage = (index: number) => {
             <TabPanel value="0">
               <div class="flex flex-col gap-6">
                 <div class="gap-4 flex flex-col">
-                  <div class="min-w-40">
-                    <label for="tieu_de" class="block font-bold mb-3 required"
-                      >Tiêu đề (EN)</label
-                    >
-                    <InputText
-                      id="tieu_de"
-                      name="tieu_de"
-                      fluid
-                      placeholder="Nhập tên tiêu đề"
-                    />
-                    <Message
-                      v-if="$form.tieu_de?.invalid"
-                      severity="error"
-                      variant="simple"
-                    >
-                      {{ $form.tieu_de.error.message }}
-                    </Message>
-                  </div>
-                  <div class="min-w-40">
-                    <label for="mo_ta" class="block font-bold mb-3 required"
-                      >Mô tả (EN)</label
-                    >
-                    <Textarea
-                      id="mo_ta"
-                      name="mo_ta"
-                      fluid
-                      placeholder="Nhập mô tả"
-                      row="3"
-                    />
-                    <Message
-                      v-if="$form.mo_ta?.invalid"
-                      severity="error"
-                      variant="simple"
-                    >
-                      {{ $form.mo_ta.error.message }}
-                    </Message>
-                  </div>
+                  <FormBaiVietNgonNgu
+                    v-model="initialValues.baiviet_ngonngu[0]"
+                    language="EN"
+                    :isContentEnabled="isEnabled"
+                  />
                   <div class="flex justify-end">
                     <Button
                       type="button"
@@ -823,84 +740,43 @@ const removeUploadedImage = (index: number) => {
               </div>
             </TabPanel>
             <TabPanel value="1">
-              <div class="flex flex-col gap-4">
-                <div class="min-w-40">
-                  <label for="tieu_de_ko" class="block font-bold mb-3 required"
-                    >Tiêu đề (KO)</label
-                  >
-                  <InputText
-                    v-model="initialValues.baiviet_ngonngu[1].ten_tieu_de"
-                    id="tieu_de_ko"
-                    fluid
-                    placeholder="Nhập tiêu đề tiếng Hàn"
-                  />
-                </div>
-                <div class="min-w-40">
-                  <label for="mo_ta_ko" class="block font-bold mb-3 required"
-                    >Mô tả (KO)</label
-                  >
-                  <Textarea
-                    v-model="initialValues.baiviet_ngonngu[1].mo_ta"
-                    id="mo_ta_ko"
-                    fluid
-                    placeholder="Nhập mô tả tiếng Hàn"
-                    row="3"
-                  />
-                </div>
-                <div v-if="isEnabled" class="min-w-40">
-                  <label for="noi_dung_ko" class="block font-bold mb-3"
-                    >Nội dung (KO)</label
-                  >
-                  <Editor
-                    v-model="initialValues.baiviet_ngonngu[1].noi_dung"
-                    id="noi_dung_ko"
-                    fluid
-                    placeholder="Nhập nội dung tiếng Hàn"
-                  />
-                </div>
-              </div>
+              <FormBaiVietNgonNgu
+                v-model="initialValues.baiviet_ngonngu[1]"
+                language="KO"
+                :isContentEnabled="isEnabled"
+              />
             </TabPanel>
             <TabPanel value="2">
-              <div class="flex flex-col gap-4">
-                <div class="min-w-40">
-                  <label for="tieu_de_fr" class="block font-bold mb-3 required"
-                    >Tiêu đề (FR)</label
-                  >
-                  <InputText
-                    v-model="initialValues.baiviet_ngonngu[2].ten_tieu_de"
-                    id="tieu_de_fr"
-                    fluid
-                    placeholder="Nhập tiêu đề tiếng Pháp"
-                  />
-                </div>
-                <div class="min-w-40">
-                  <label for="mo_ta_fr" class="block font-bold mb-3 required"
-                    >Mô tả (FR)</label
-                  >
-                  <Textarea
-                    v-model="initialValues.baiviet_ngonngu[2].mo_ta"
-                    id="mo_ta_fr"
-                    fluid
-                    placeholder="Nhập mô tả tiếng Pháp"
-                    row="3"
-                  />
-                </div>
-                <div v-if="isEnabled" class="min-w-40">
-                  <label for="noi_dung_fr" class="block font-bold mb-3"
-                    >Nội dung (FR)</label
-                  >
-                  <Editor
-                    v-model="initialValues.baiviet_ngonngu[2].noi_dung"
-                    id="noi_dung_fr"
-                    fluid
-                    placeholder="Nhập nội dung tiếng Pháp"
-                  />
-                </div>
-              </div>
+              <FormBaiVietNgonNgu
+                v-model="initialValues.baiviet_ngonngu[2]"
+                language="FR"
+                :isContentEnabled="isEnabled"
+              />
+            </TabPanel>
+            <TabPanel value="3">
+              <FormBaiVietNgonNgu
+                v-model="initialValues.baiviet_ngonngu[3]"
+                language="JA"
+                :isContentEnabled="isEnabled"
+              />
+            </TabPanel>
+            <TabPanel value="4">
+              <FormBaiVietNgonNgu
+                v-model="initialValues.baiviet_ngonngu[4]"
+                language="ES"
+                :isContentEnabled="isEnabled"
+              />
+            </TabPanel>
+            <TabPanel value="5">
+              <FormBaiVietNgonNgu
+                v-model="initialValues.baiviet_ngonngu[5]"
+                language="TH"
+                :isContentEnabled="isEnabled"
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>
-        <div class="gap-4 flex flex-col">
+        <div class="gap-4 flex flex-col mt-6">
           <div class="min-w-40">
             <label for="thumucId" class="block font-bold mb-3 required"
               >Thư mục</label
@@ -980,8 +856,9 @@ const removeUploadedImage = (index: number) => {
                     <div class="flex flex-col gap-2">
                       <span
                         class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
-                        >{{ file.name }}</span
                       >
+                        {{ file.name }}
+                      </span>
                       <div>{{ formatSize(file.size) }}</div>
                     </div>
                     <Badge
@@ -1027,8 +904,9 @@ const removeUploadedImage = (index: number) => {
                     <div class="flex flex-col gap-2">
                       <span
                         class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
-                        >{{ file.name }}</span
                       >
+                        {{ file.name }}
+                      </span>
                       <div>{{ formatSize(file.size) }}</div>
                     </div>
                     <Badge value="Thành công" severity="success" />
@@ -1079,15 +957,6 @@ const removeUploadedImage = (index: number) => {
                 </div>
               </template>
             </FileUpload>
-            <!-- Show uploaded image URLs as JSON -->
-            <!-- <div v-if="uploadedImageUrls.length > 0" class="mt-4">
-                  <label class="block font-bold mb-2">URLs ảnh (JSON)</label>
-                  <textarea 
-                    readonly 
-                    class="w-full p-2 border rounded bg-gray-100" 
-                    rows="3"
-                  >{{ JSON.stringify(uploadedImageUrls) }}</textarea>
-                </div> -->
           </div>
           <div class="min-w-40">
             <label for="vi_tri" class="block font-bold mb-3 required"
