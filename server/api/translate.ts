@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
           contents: [{ text: prompt }],
           model: 'gemini-2.0-flash-001',
         });
-        const translatedText = result.text || '';
+        const translatedText = (result.text || '').trim();
         
         translations[langCode] = translatedText;
       }

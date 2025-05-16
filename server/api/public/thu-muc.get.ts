@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
         id: item.id,
         thu_tu: item.thu_tu,
         duong_dan: item.duong_dan,
+        ten_thumuc: item.thumuc_ngonngu?.ngon_ngu === 'en' ? item.thumuc_ngonngu.ten_thumuc : '',
         thumuc_ngonngu: []
       });
     }

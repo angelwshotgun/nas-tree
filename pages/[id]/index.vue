@@ -27,7 +27,9 @@
               :target="item.target"
               v-bind="props.action"
             >
-              <span class="text-surface-700 dark:text-surface-0">{{ item.label }}</span>
+              <span class="text-surface-700 dark:text-surface-0">{{
+                item.label
+              }}</span>
             </a>
           </template>
         </Breadcrumb>
@@ -42,7 +44,7 @@
           </InputIcon>
           <InputText
             v-model="searchQuery"
-            placeholder="Tìm kiếm"
+            :placeholder="$t('search_placeholder')"
             class="w-full"
             @focus="handleSearchFocus"
           />
@@ -82,7 +84,7 @@
 
             <template #empty>
               <div class="p-4 text-center text-gray-500">
-                Nhập từ khóa để tìm kiếm
+                {{ $t('search_placeholder1') }}
               </div>
             </template>
           </DataView>
@@ -90,11 +92,25 @@
       </div>
     </template>
   </Toolbar>
-  
-  <div class="card mx-auto min-h-[calc(100vh-94px)] lg:px-[8rem] xl:px-[28rem] 2xl:px-[32rem] 3xl:px-[32rem]">
+
+  <div class="flex justify-end mb-4">
+    <Button
+      v-for="locale in locales"
+      :key="locale.code"
+      class="p-button-text"
+      severity="secondary"
+      @click="setLocale(locale.code)"
+    >
+      {{ locale.name }}
+    </Button>
+  </div>
+
+  <div
+    class="card mx-auto min-h-[calc(100vh-94px)] lg:px-[8rem] xl:px-[28rem] 2xl:px-[32rem] 3xl:px-[32rem]"
+  >
     <div class="flex flex-col gap-5">
-      <div 
-        v-for="baiviet in listBaiViet" 
+      <div
+        v-for="baiviet in listBaiViet"
         :key="baiviet.id"
         class="flex flex-col md:flex-row md:px-12 gap-2 border-b border-gray-200 py-8"
       >
@@ -104,13 +120,22 @@
             :class="{ 'cursor-pointer text-primary': isNavigable(baiviet) }"
             @click="navigateToArticle(baiviet)"
           >
-            {{ baiviet.tieu_de }}
+            {{
+              baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)
+                ?.tieu_de
+            }}
           </h2>
-          <div class="w-full text-gray-700 break-words text-wrap whitespace-pre-line [&_.ql-align-justify]:text-justify [&_.ql-align-center]:text-center [&_.ql-align-right]:text-right">
-            {{ baiviet.mo_ta }}
+          <div
+            class="w-full text-gray-700 break-words text-wrap whitespace-pre-line [&_.ql-align-justify]:text-justify [&_.ql-align-center]:text-center [&_.ql-align-right]:text-right"
+          >
+            {{
+              baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)?.mo_ta
+            }}
           </div>
         </div>
-        <div class="relative w-full md:w-[300px] h-[200px] md:h-[300px] md:mt-0">
+        <div
+          class="relative w-full md:w-[300px] h-[200px] md:h-[300px] md:mt-0"
+        >
           <img
             :class="{ 'cursor-pointer': isNavigable(baiviet) }"
             @click="navigateToArticle(baiviet)"
@@ -124,7 +149,12 @@
           >
             <a :href="baiviet.vi_tri" target="_blank" class="cursor-pointer">
               <i
-                :class="[isGoogleMapsLink(baiviet.vi_tri) ? 'pi pi-map-marker' : 'pi pi-link', 'text-white text-xl']"
+                :class="[
+                  isGoogleMapsLink(baiviet.vi_tri)
+                    ? 'pi pi-map-marker'
+                    : 'pi pi-link',
+                  'text-white text-xl',
+                ]"
               ></i>
             </a>
           </div>
@@ -149,6 +179,7 @@ definePageMeta({
 const route = useRoute();
 const id = route.params.id as string;
 
+const { locale, locales, setLocale, t } = useI18n();
 const listBaiViet = ref<BaiVietModel[]>([]);
 const thuMuc = ref<ThuMucModel>();
 const searchQuery = ref('');
@@ -161,15 +192,24 @@ const home = ref({
   route: '/',
 });
 
-// Load article data
+const { data: thuMucList } = useNuxtData<ThuMucModel[]>('thuMucList');
+
 onMounted(async () => {
   try {
     listBaiViet.value = await BaiVietService.GetBaiViet(id);
-    
-    // Set up click outside detection for search
+
     document.addEventListener('click', handleClickOutside);
   } catch (error) {
     console.error('Error loading articles:', error);
+  }
+
+  try {
+    if (thuMucList.value) return;
+    const response = await ThuMucService.GetThuMucPublic();
+    thuMucList.value = response;
+    useNuxtData<ThuMucModel[]>('thuMucList').data.value = response;
+  } catch (error) {
+    console.error('Error fetching thu muc:', error);
   }
 });
 
@@ -179,13 +219,20 @@ onUnmounted(() => {
 });
 
 const breadcrumbItems = computed(() => {
-  if (!listBaiViet.value?.length) return [];
-  
-  const firstArticle = listBaiViet.value[0];
+  const firstArticle =
+    Array.isArray(listBaiViet.value) && listBaiViet.value.length > 0
+      ? listBaiViet.value[0]
+      : undefined;
+  if (!firstArticle) return [];
+  const thuMucItem = thuMucList.value?.find(
+    (t) => t.id === firstArticle.thumucId
+  );
   return [
     {
-      label: firstArticle.thumuc?.ten_thumuc || '',
-      route: `/${firstArticle.thumuc?.duong_dan || ''}`,
+      label:
+        thuMucItem?.thumuc_ngonngu?.find((t) => t.ngon_ngu === locale.value)
+          ?.ten_thumuc || '',
+      route: thuMucItem ? `/${thuMucItem.duong_dan}` : '',
     },
   ];
 });
@@ -201,7 +248,7 @@ function getFirstImage(imageData: string | null | undefined): string {
 }
 
 function isNavigable(article: BaiVietModel): boolean {
-  return article.noi_dung !== '<p> </p>';
+  return article.noi_dung !== '';
 }
 
 function isGoogleMapsLink(url: string | null | undefined): boolean {
@@ -209,8 +256,13 @@ function isGoogleMapsLink(url: string | null | undefined): boolean {
 }
 
 function navigateToArticle(article: BaiVietModel): void {
-  if (isNavigable(article)) {
-    navigateTo(`/${id}/${article.duong_dan}`);
+  if (
+    isNavigable(article) &&
+    Array.isArray(article.baiviet_ngonngu) &&
+    article.baiviet_ngonngu.length > 0 &&
+    article.baiviet_ngonngu[0].duong_dan
+  ) {
+    navigateTo(`/${id}/${article.baiviet_ngonngu[0].duong_dan}`);
   }
 }
 
@@ -220,7 +272,7 @@ async function searchArticles(): Promise<void> {
     searchResults.value = [];
     return;
   }
-  
+
   try {
     searchResults.value = await BaiVietService.SearchBaiViet(searchQuery.value);
   } catch (error) {
@@ -242,7 +294,10 @@ function selectItem(item: BaiVietModel): void {
 }
 
 function handleClickOutside(event: MouseEvent): void {
-  if (searchContainer.value && !searchContainer.value.contains(event.target as Node)) {
+  if (
+    searchContainer.value &&
+    !searchContainer.value.contains(event.target as Node)
+  ) {
     showDataView.value = false;
   }
 }

@@ -14,10 +14,15 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'update']);
 
+// Ensure we're using consistent property names
 const updateTitle = (value) => {
-  const updatedValue = { ...props.modelValue, ten_tieu_de: value };
+  const updatedValue = { 
+    ...props.modelValue, 
+    ten_tieu_de: value,
+    tieu_de: value // Update both properties to ensure consistency
+  };
   emit('update:modelValue', updatedValue);
 };
 
@@ -29,6 +34,7 @@ const updateDescription = (value) => {
 const updateContent = (value) => {
   const updatedValue = { ...props.modelValue, noi_dung: value };
   emit('update:modelValue', updatedValue);
+  emit('update', props.modelValue.noi_dung);
 };
 </script>
 
@@ -40,7 +46,7 @@ const updateContent = (value) => {
       </label>
       <InputText
         :id="`tieu_de_${language}`"
-        :value="modelValue.ten_tieu_de"
+        :value="modelValue.ten_tieu_de || modelValue.tieu_de"
         @input="updateTitle($event.target.value)"
         fluid
         :placeholder="`Nhập tiêu đề tiếng ${language}`"
@@ -56,19 +62,20 @@ const updateContent = (value) => {
         @input="updateDescription($event.target.value)"
         fluid
         :placeholder="`Nhập mô tả tiếng ${language}`"
-        row="3"
+        rows="3"
       />
     </div>
     <div v-if="isContentEnabled" class="min-w-40">
       <label :for="`noi_dung_${language}`" class="block font-bold mb-3">
         Nội dung ({{ language }})
       </label>
-      <Editor
+      <Textarea
         :id="`noi_dung_${language}`"
         :value="modelValue.noi_dung"
-        @input="updateContent($event)"
+        @input="updateContent($event.target.value)"
         fluid
         :placeholder="`Nhập nội dung tiếng ${language}`"
+        rows="6"
       />
     </div>
   </div>

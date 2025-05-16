@@ -6,6 +6,9 @@ class BaiVietNgonNguModel {
   noi_dung?: string;
   ngon_ngu?: string;
   locale?: string;
+  duong_dan?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 class BaiVietModel {

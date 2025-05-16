@@ -48,7 +48,7 @@
             </InputIcon>
             <InputText
               v-model="searchQuery"
-              placeholder="Tìm kiếm"
+              :placeholder="$t('search_placeholder')"
               class="w-full"
               @click="showDataView = true"
               @focus="showDataView = true"
@@ -90,7 +90,7 @@
 
               <template #empty>
                 <div class="p-4 text-center text-gray-500">
-                  Nhập từ khóa để tìm kiếm
+                  {{ $t('search_placeholder1') }}
                 </div>
               </template>
             </DataView>
@@ -99,21 +99,39 @@
       </template>
     </Toolbar>
 
-    <!-- Nội dung chính của bài báo -->
+    <div class="flex justify-end mb-4">
+      <Button
+        v-for="locale in locales"
+        :key="locale.code"
+        class="p-button-text"
+        severity="secondary"
+        @click="setLocale(locale.code)"
+      >
+        {{ locale.name }}
+      </Button>
+    </div>
+
     <div
       class="card mx-auto min-h-[calc(100vh-94px)] lg:px-[8rem] xl:px-[28rem] 2xl:px-[32rem] 3xl:px-[32rem]"
     >
       <div v-if="baiviet" class="article-content">
         <!-- Tiêu đề bài báo -->
-        <h1 class="text-3xl lg:text-4xl font-bold mb-4 text-primary">
-          {{ baiviet.tieu_de }}
+        <h1 class="text-3xl lg:text-4xl font-bold text-primary">
+          {{
+            baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)?.tieu_de
+          }}
         </h1>
 
         <!-- Thông tin bài báo -->
         <div class="flex items-center gap-4 text-gray-600 mb-6">
           <span
             ><i class="pi pi-calendar mr-2"></i
-            >{{ formatDate(baiviet?.createdAt || '') }}</span
+            >{{
+              formatDate(
+                baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)
+                  ?.createdAt || ''
+              )
+            }}</span
           >
           <!-- <span
             ><i class="pi pi-user mr-2"></i
@@ -124,9 +142,12 @@
             xem</span
           > -->
         </div>
-
+        <span>{{
+          baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)?.mo_ta ||
+          ''
+        }}</span>
         <!-- Nội dung bài báo và hình ảnh -->
-        <div class="flex flex-col lg:flex-row gap-8">
+        <div class="flex flex-col lg:flex-row gap-8  mt-4">
           <!-- Phần nội dung chính -->
           <div class="w-full lg:w-full">
             <!-- Ảnh chính cho mobile -->
@@ -152,10 +173,18 @@
             </div>
 
             <!-- Nội dung bài viết -->
-            <div
+            <div>
+              <p>
+                {{
+                  baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)
+                    ?.noi_dung
+                }}
+              </p>
+            </div>
+            <!-- <div
               class="article-body text-gray-800 leading-relaxed text-lg mb-8 whitespace-pre-line [&_.ql-align-justify]:text-justify [&_.ql-align-center]:text-center [&_.ql-align-right]:text-right"
               v-html="baiviet.noi_dung"
-            ></div>
+            ></div> -->
 
             <!-- Tags hoặc chủ đề liên quan -->
             <!-- <div v-if="baiviet.chu_de" class="flex flex-wrap gap-2 mt-6">
@@ -216,12 +245,10 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  RouteLocationAsRelativeGeneric,
-  RouteLocationAsPathGeneric,
-} from 'vue-router';
 import type { BaiVietModel } from '~/models/bai-viet.model';
+import type { ThuMucModel } from '~/models/thu-muc.model';
 import { BaiVietService } from '~/services/bai-viet.service';
+import { ThuMucService } from '~/services/thu-muc.service';
 
 definePageMeta({
   layout: 'main',
@@ -230,6 +257,7 @@ definePageMeta({
 
 const route = useRoute();
 const duongdan = route.params.baiviet;
+const { locale, locales, setLocale, t } = useI18n();
 
 // Lấy thông tin bài viết chính
 const baiviet = ref<BaiVietModel>();
@@ -239,14 +267,26 @@ const searchQuery = ref('');
 const showDataView = ref(false);
 const searchResults = ref<BaiVietModel[]>([]);
 
-onMounted(() => {
+const { data: thuMucList } = useNuxtData<ThuMucModel[]>('thuMucList');
+
+onMounted(async () => {
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
     if (!target.closest('.relative') && showDataView.value) {
       showDataView.value = false;
     }
   });
+
   fetchBaiViet();
+
+  try {
+    if (thuMucList.value) return;
+    const response = await ThuMucService.GetThuMucPublic();
+    thuMucList.value = response;
+    useNuxtData<ThuMucModel[]>('thuMucList').data.value = response;
+  } catch (error) {
+    console.error('Error fetching thu muc:', error);
+  }
 });
 
 const searchArticles = async () => {
@@ -259,7 +299,6 @@ const searchArticles = async () => {
 };
 
 const selectItem = (item: BaiVietModel) => {
-  console.log(item);
   navigateTo(`/${item.thumuc?.duong_dan}/${item.duong_dan}`);
   showDataView.value = false;
 };
@@ -291,14 +330,17 @@ const home = ref({
 });
 
 const breadcrumbItems = computed(() => {
-  if (!baiviet.value) return [];
+  const thuMucItem = thuMucList.value?.find(
+    (t) => t.id === baiviet.value?.thumucId
+  );
 
   return [
     {
-      label: baiviet.value.thumuc?.ten_thumuc || '',
-      route: `/${baiviet.value.thumuc?.duong_dan || ''}`,
+      label:
+        thuMucItem?.thumuc_ngonngu?.find((t) => t.ngon_ngu === locale.value)
+          ?.ten_thumuc || '',
+      route: thuMucItem ? `/${thuMucItem.duong_dan}` : '',
     },
-    { label: baiviet.value.tieu_de },
   ];
 });
 

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Invalid request body' });
   }
 
-  const ten_thumuc_vn = body.thumuc_ngonngu.find(x => x.ngon_ngu === 'vi')?.ten_thumuc || body.thumuc_ngonngu[0].ten_thumuc;
+  const ten_thumuc_vn = body.thumuc_ngonngu.find(x => x.ngon_ngu === 'en')?.ten_thumuc || body.thumuc_ngonngu[0].ten_thumuc;
 
   const duong_dan = ten_thumuc_vn
     .toLowerCase()

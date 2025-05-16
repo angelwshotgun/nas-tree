@@ -1,10 +1,12 @@
 import { NuxtAuthHandler } from "#auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
+const Credentials = CredentialsProvider.default;
 import { eq } from "drizzle-orm";
 
+const db = useDrizzle();
 export default NuxtAuthHandler({
-  adapter: DrizzleAdapter(useDrizzle()),
+  adapter: DrizzleAdapter(db),
   secret: process.env.AUTH_SECRET || "your-secret-here",
   session: {
     strategy: "jwt",
@@ -12,7 +14,7 @@ export default NuxtAuthHandler({
     updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },

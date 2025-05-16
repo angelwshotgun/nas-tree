@@ -62,22 +62,11 @@ const form = ref<FormInstance | null>(null);
 const resolver = ref(
   yupResolver(
     yup.object().shape({
-      tieu_de: yup
-        .string()
-        .nullable()
-        .required("Vui lòng nhập tiêu đề!")
-        .label("tiêu đề"),
-      mo_ta: yup
-        .string()
-        .nullable()
-        .required("Vui lòng nhập mô tả!")
-        .label("mô tả"),
-      noi_dung: yup.string().nullable().label("nội dung"),
       thumucId: yup
         .number()
         .nullable()
-        .required("Vui lòng nhập thể loại!")
-        .label("thể loại"),
+        .required("Vui lòng chọn thư mục!")
+        .label("thư mục"),
       vi_tri: yup
         .string()
         .nullable()
@@ -91,6 +80,7 @@ const initialValues = ref<BaiVietModel>({
   id: 0,
   anh: "",
   vi_tri: "",
+  thumucId: 0,
   createdAt: 0,
   updatedAt: 0,
   baiviet_ngonngu: [
@@ -104,21 +94,15 @@ const initialValues = ref<BaiVietModel>({
 });
 
 const translateWithGenAI = async () => {
-  const englishTitle =
-    initialValues.value.baiviet_ngonngu[0].ten_tieu_de.trim();
-  const englishDesc = initialValues.value.baiviet_ngonngu[0].mo_ta.trim();
-  console.log(initialValues.value.baiviet_ngonngu[0].noi_dung);
-  const englishContent = isEnabled.value
-    ? initialValues.value.baiviet_ngonngu[0].noi_dung
-        .replace(/<[^>]*>/g, " ")
-        .trim()
-    : "";
+  const sourceTitle = initialValues.value.baiviet_ngonngu[0].tieu_de.trim();
+  const sourceDesc = initialValues.value.baiviet_ngonngu[0].mo_ta.trim();
+  const sourceContent = initialValues.value.baiviet_ngonngu[0].noi_dung.trim();
 
-  if (!englishTitle) {
+  if (!sourceTitle) {
     toast.add({
       severity: "warn",
       summary: "Cảnh báo",
-      detail: "Vui lòng nhập tiêu đề tiếng Anh trước!",
+      detail: "Vui lòng nhập tiêu đề tiếng Việt trước!",
       life: 3000,
     });
     return;
@@ -131,33 +115,30 @@ const translateWithGenAI = async () => {
     const responseTitle = await $fetch("/api/translate", {
       method: "POST",
       body: {
-        text: englishTitle,
-        targetLanguages: ["ko", "fr", "ja", "es", "th"],
+        text: sourceTitle,
+        targetLanguages: ["en", "ko", "fr", "ja", "es", "th"],
       },
     });
 
     // Gọi API dịch cho mô tả nếu có
     let responseDesc = null;
-    if (englishDesc) {
+    if (sourceDesc) {
       responseDesc = await $fetch("/api/translate", {
         method: "POST",
         body: {
-          text: englishDesc,
-          targetLanguages: ["ko", "fr", "ja", "es", "th"],
+          text: sourceDesc,
+          targetLanguages: ["en", "ko", "fr", "ja", "es", "th"],
         },
       });
     }
 
-    // Gọi API dịch cho nội dung nếu có và đã kích hoạt
-    console.log("isEnabled.value:", isEnabled.value);
-    console.log("englishContent:", englishContent);
     let responseContent = null;
-    if (englishContent && isEnabled.value) {
+    if (sourceContent && isEnabled.value) {
       responseContent = await $fetch("/api/translate", {
         method: "POST",
         body: {
-          text: englishContent,
-          targetLanguages: ["ko", "fr", "ja", "es", "th"],
+          text: sourceContent,
+          targetLanguages: ["en", "ko", "fr", "ja", "es", "th"],
         },
       });
     }
@@ -166,31 +147,31 @@ const translateWithGenAI = async () => {
     if (responseTitle && responseTitle.translations) {
       // Cập nhật tiếng Hàn
       if (responseTitle.translations.ko) {
-        initialValues.value.baiviet_ngonngu[1].ten_tieu_de =
+        initialValues.value.baiviet_ngonngu[1].tieu_de =
           responseTitle.translations.ko;
       }
 
       // Cập nhật tiếng Pháp
       if (responseTitle.translations.fr) {
-        initialValues.value.baiviet_ngonngu[2].ten_tieu_de =
+        initialValues.value.baiviet_ngonngu[2].tieu_de =
           responseTitle.translations.fr;
       }
 
       // Cập nhật tiếng Nhật
       if (responseTitle.translations.ja) {
-        initialValues.value.baiviet_ngonngu[3].ten_tieu_de =
+        initialValues.value.baiviet_ngonngu[3].tieu_de =
           responseTitle.translations.ja;
       }
 
       // Cập nhật tiếng Tây Ban Nha
       if (responseTitle.translations.es) {
-        initialValues.value.baiviet_ngonngu[4].ten_tieu_de =
+        initialValues.value.baiviet_ngonngu[4].tieu_de =
           responseTitle.translations.es;
       }
 
       // Cập nhật tiếng Thái
       if (responseTitle.translations.th) {
-        initialValues.value.baiviet_ngonngu[5].ten_tieu_de =
+        initialValues.value.baiviet_ngonngu[5].tieu_de =
           responseTitle.translations.th;
       }
 
@@ -244,32 +225,29 @@ const translateWithGenAI = async () => {
 
     // Xử lý kết quả dịch nội dung
     if (responseContent && responseContent.translations && isEnabled.value) {
-      // Các thẻ HTML ban đầu
-      const originalHTML = initialValues.value.noi_dung;
-
       // Cập nhật tiếng Hàn
       if (responseContent.translations.ko) {
-        initialValues.value.baiviet_ngonngu[1].noi_dung = `<p>${responseContent.translations.ko}</p>`;
+        initialValues.value.baiviet_ngonngu[1].noi_dung = `${responseContent.translations.ko}`;
       }
 
       // Cập nhật tiếng Pháp
       if (responseContent.translations.fr) {
-        initialValues.value.baiviet_ngonngu[2].noi_dung = `<p>${responseContent.translations.fr}</p>`;
+        initialValues.value.baiviet_ngonngu[2].noi_dung = `${responseContent.translations.fr}`;
       }
 
       // Cập nhật tiếng Nhật
       if (responseContent.translations.ja) {
-        initialValues.value.baiviet_ngonngu[3].noi_dung = `<p>${responseContent.translations.ja}</p>`;
+        initialValues.value.baiviet_ngonngu[3].noi_dung = `${responseContent.translations.ja}`;
       }
 
       // Cập nhật tiếng Tây Ban Nha
       if (responseContent.translations.es) {
-        initialValues.value.baiviet_ngonngu[4].noi_dung = `<p>${responseContent.translations.es}</p>`;
+        initialValues.value.baiviet_ngonngu[4].noi_dung = `${responseContent.translations.es}`;
       }
 
       // Cập nhật tiếng Thái
       if (responseContent.translations.th) {
-        initialValues.value.baiviet_ngonngu[5].noi_dung = `<p>${responseContent.translations.th}</p>`;
+        initialValues.value.baiviet_ngonngu[5].noi_dung = `${responseContent.translations.th}`;
       }
 
       toast.add({
@@ -295,26 +273,20 @@ const translateWithGenAI = async () => {
 
 const onSubmit = (e: FormSubmitEvent) => {
   if (e.valid) {
-    // Chuẩn bị dữ liệu ngôn ngữ cho API
     const baivietNgonNgu = initialValues.value.baiviet_ngonngu.map((item) => ({
-      tieu_de: item.ten_tieu_de,
+      tieu_de: item.tieu_de,
       mo_ta: item.mo_ta,
-      noi_dung: item.noi_dung?.replace(/&nbsp;/g, " ") || "",
+      noi_dung: item.noi_dung,
       ngon_ngu: item.ngon_ngu,
       locale: item.locale,
     }));
-
     const BaiVietDTO: BaiVietModel = {
       id: initialValues.value.id,
-      tieu_de: e.values.tieu_de,
-      mo_ta: e.values.mo_ta,
-      noi_dung: e.values.noi_dung?.replace(/&nbsp;/g, " ") || "",
-      vi_tri: e.values.vi_tri,
       thumucId: e.values.thumucId,
+      vi_tri: e.values.vi_tri,
       anh: JSON.stringify(uploadedImageUrls.value),
       baiviet_ngonngu: baivietNgonNgu,
     };
-
     confirm.require({
       message: `${
         BaiVietDTO.id != null && BaiVietDTO.id > 0
@@ -408,19 +380,15 @@ const onSubmit = (e: FormSubmitEvent) => {
 
 watchEffect(() => {
   if (props.baiViet?.id != undefined) {
-    if (props.baiViet?.noi_dung !== "<p> </p>") {
+    if (props.baiViet?.noi_dung !== "") {
       isEnabled.value = true;
-      form.value?.setFieldValue("noi_dung", props.baiViet?.noi_dung);
     }
     initialValues.value.id = props.baiViet?.id;
-    initialValues.value.tieu_de = props.baiViet?.tieu_de ?? "";
-    initialValues.value.mo_ta = props.baiViet?.mo_ta ?? "";
-    initialValues.value.noi_dung = props.baiViet?.noi_dung ?? "";
     initialValues.value.vi_tri = props.baiViet?.vi_tri ?? "";
-    initialValues.value.thumucId = props.baiViet?.thumucId ?? null;
+    initialValues.value.thumucId = props.baiViet?.thumucId ?? 0;
     initialValues.value.anh = props.baiViet?.anh ?? "";
-    initialValues.value.createdAt = props.baiViet?.createdAt ?? null;
-    initialValues.value.updatedAt = props.baiViet?.updatedAt ?? null;
+    initialValues.value.createdAt = props.baiViet?.createdAt ?? 0;
+    initialValues.value.updatedAt = props.baiViet?.updatedAt ?? 0;
 
     if (props.baiViet?.anh) {
       try {
@@ -439,42 +407,42 @@ watchEffect(() => {
       // Tạo mảng ngôn ngữ chuẩn
       let standardNgonNgu = [
         {
-          ten_tieu_de: "",
+          tieu_de: "",
           mo_ta: "",
           noi_dung: "",
           ngon_ngu: "en",
           locale: "en-US",
         },
         {
-          ten_tieu_de: "",
+          tieu_de: "",
           mo_ta: "",
           noi_dung: "",
           ngon_ngu: "ko",
           locale: "ko-KR",
         },
         {
-          ten_tieu_de: "",
+          tieu_de: "",
           mo_ta: "",
           noi_dung: "",
           ngon_ngu: "fr",
           locale: "fr-FR",
         },
         {
-          ten_tieu_de: "",
+          tieu_de: "",
           mo_ta: "",
           noi_dung: "",
           ngon_ngu: "ja",
           locale: "ja-JP",
         },
         {
-          ten_tieu_de: "",
+          tieu_de: "",
           mo_ta: "",
           noi_dung: "",
           ngon_ngu: "es",
           locale: "es-ES",
         },
         {
-          ten_tieu_de: "",
+          tieu_de: "",
           mo_ta: "",
           noi_dung: "",
           ngon_ngu: "th",
@@ -489,11 +457,11 @@ watchEffect(() => {
         );
         if (index !== -1) {
           standardNgonNgu[index] = {
-            ten_tieu_de: ngonNgu.tieu_de || "",
+            tieu_de: ngonNgu.tieu_de || "",
             mo_ta: ngonNgu.mo_ta || "",
             noi_dung: ngonNgu.noi_dung || "",
-            ngon_ngu: ngonNgu.ngon_ngu,
-            locale: ngonNgu.locale,
+            ngon_ngu: ngonNgu.ngon_ngu || '',
+            locale: ngonNgu.locale || '',
           };
         }
       }
@@ -517,8 +485,9 @@ watch(
   () => isEnabled,
   () => {
     if (isEnabled.value === false) {
-      initialValues.value.noi_dung = "<p> </p>";
-      form.value?.setFieldValue("noi_dung", "<p> </p>");
+      initialValues.value?.baiviet_ngonngu?.forEach(item => {
+        item.noi_dung = "";
+      });
     }
   },
   { immediate: true }
@@ -533,52 +502,49 @@ const emit = defineEmits(["hideModal", "reloadDataTable"]);
 const handleHideModal = () => {
   initialValues.value = {
     id: 0,
-    tieu_de: "",
-    mo_ta: "",
-    noi_dung: "",
     anh: "",
     vi_tri: "",
-    thumucId: null,
-    createdAt: null,
-    updatedAt: null,
+    thumucId: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
     baiviet_ngonngu: [
       {
-        ten_tieu_de: "",
+        tieu_de: "",
         mo_ta: "",
         noi_dung: "",
-        ngon_ngu: "en",
+        ngon_ngu: "en", 
         locale: "en-US",
       },
       {
-        ten_tieu_de: "",
+        tieu_de: "",
         mo_ta: "",
         noi_dung: "",
         ngon_ngu: "ko",
         locale: "ko-KR",
       },
       {
-        ten_tieu_de: "",
+        tieu_de: "",
         mo_ta: "",
         noi_dung: "",
         ngon_ngu: "fr",
         locale: "fr-FR",
       },
       {
-        ten_tieu_de: "",
+        tieu_de: "",
         mo_ta: "",
         noi_dung: "",
         ngon_ngu: "ja",
         locale: "ja-JP",
       },
       {
-        ten_tieu_de: "",
+        tieu_de: "",
         mo_ta: "",
         noi_dung: "",
         ngon_ngu: "es",
         locale: "es-ES",
       },
       {
-        ten_tieu_de: "",
+        tieu_de: "",
         mo_ta: "",
         noi_dung: "",
         ngon_ngu: "th",
@@ -812,24 +778,6 @@ const removeUploadedImage = (index: number) => {
               option-label="label"
               option-value="value"
             />
-          </div>
-          <div v-if="isEnabled" class="min-w-40">
-            <label for="noi_dung" class="block font-bold mb-3 required"
-              >Nội dung</label
-            >
-            <Editor
-              id="noi_dung"
-              name="noi_dung"
-              fluid
-              placeholder="Nhập tên nội dung"
-            />
-            <Message
-              v-if="$form.noi_dung?.invalid"
-              severity="error"
-              variant="simple"
-            >
-              {{ $form.noi_dung.error.message }}
-            </Message>
           </div>
           <div class="min-w-40">
             <label class="block font-bold mb-3">Ảnh</label>

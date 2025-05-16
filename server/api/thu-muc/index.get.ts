@@ -27,10 +27,12 @@ export default defineEventHandler(async (event) => {
 
   for (const item of result) {
     if (!thumucsMap.has(item.id)) {
+      const englishName = result.find(r => r.id === item.id && r.thumuc_ngonngu?.ngon_ngu === 'en')?.thumuc_ngonngu?.ten_thumuc || '';
       thumucsMap.set(item.id, {
         id: item.id,
         thu_tu: item.thu_tu,
         duong_dan: item.duong_dan,
+        ten_thumuc: englishName,
         thumuc_ngonngu: []
       });
     }
