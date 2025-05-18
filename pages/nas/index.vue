@@ -2,6 +2,6 @@
 
 <script lang="ts" setup>
 definePageMeta({
-  middleware: 'sidebase-auth'
+  middleware: 'auth'
 })
 </script>

@@ -1,7 +1,6 @@
 import { NuxtAuthHandler } from "#auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
-const Credentials = CredentialsProvider.default;
 import { eq } from "drizzle-orm";
 
 const db = useDrizzle();
@@ -14,7 +13,7 @@ export default NuxtAuthHandler({
     updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
-    Credentials({
+    CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
