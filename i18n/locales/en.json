@@ -1,4 +1,5 @@
 {
   "search_placeholder": "Search",
-  "search_placeholder1": "Enter keywords to search"
+  "search_placeholder1": "Enter keywords to search",
+  "search_no_results": "No results found"
 }

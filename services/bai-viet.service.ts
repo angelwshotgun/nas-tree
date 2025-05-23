@@ -1,9 +1,21 @@
 import type { BaiVietModel } from '~/models/bai-viet.model';
 class _BaiVietService {
-  async GetBaiViet(duong_dan?: string) {
-    const response = await $api<BaiVietModel[]>('/api/public/bai-viet', {
+  async GetBaiViet(thumucId?: number) {
+    const response = await $api<BaiVietModel[]>(
+      `/api/bai-viet?thumucId=${thumucId}`,
+      {
       method: 'GET',
-      params: { duong_dan },
+      params: { thumucId },
+    });
+    if (response) {
+      return response;
+    }
+    return [];
+  }
+
+  async GetBaiVietList(duong_dan?: string) {
+    const response = await $api<BaiVietModel[]>(`/api/public/bai-viet/list/${duong_dan}`, {
+      method: 'GET',
     });
     if (response) {
       return response;
@@ -23,15 +35,15 @@ class _BaiVietService {
     return undefined;
   }
 
-  async SearchBaiViet(keyword?: string) {
+  async SearchBaiViet(keyword?: string, ngon_ngu?: string) {
     const response = await $api<BaiVietModel[]>(
       `/api/public/search`,
       {
       method: 'GET',
-      params: { keyword },
+      params: { keyword, ngon_ngu },
     });
     if (response) {
-      return response.results;
+      return response;
     }
     return [];
   }

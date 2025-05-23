@@ -1,14 +1,27 @@
-import { like } from "drizzle-orm/sql";
-
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const { ngon_ngu, keyword } = query;
-
-  if (!ngon_ngu || !keyword) {
-    throw new Error('Missing ngon_ngu or keyword parameters');
+  const slug = getRouterParam(event, 'id');
+  if (!slug) {
+    throw new Error('Missing slug parameter');
   }
 
-  const result = await useDrizzle()
+  const db = useDrizzle();
+
+  // Bước 1: Truy vấn thư mục theo slug
+  const thumuc = await db
+    .select({
+      id: tables.thumuc.id,
+      duong_dan: tables.thumuc.duong_dan,
+    })
+    .from(tables.thumuc)
+    .where(eq(tables.thumuc.duong_dan, slug))
+    .get();
+
+  if (!thumuc) {
+    throw createError({ statusCode: 404, message: 'Thư mục không tồn tại' });
+  }
+
+  // Bước 2: Truy vấn bài viết theo thumucId
+  const result = await db
     .select({
       id: tables.baiviet.id,
       thumucId: tables.baiviet.thumucId,
@@ -32,42 +45,29 @@ export default defineEventHandler(async (event) => {
       tables.baiviet_ngonngu,
       eq(tables.baiviet.id, tables.baiviet_ngonngu.baivietId)
     )
-    .where(
-      and(
-        eq(tables.baiviet_ngonngu.ngon_ngu, ngon_ngu as string),
-        like(tables.baiviet_ngonngu.tieu_de, `%${keyword}%`)
-      )
-    )
-    .limit(5)
+    .where(eq(tables.baiviet.thumucId, thumuc.id))
     .all();
 
-  // Nhóm dữ liệu theo bài viết
+  // Gom bài viết
   const baivietsMap = new Map();
 
   for (const item of result) {
     if (!baivietsMap.has(item.id)) {
-      const englishTitle =
-        result.find(
-          (r) => r.id === item.id && r.baiviet_ngonngu?.ngon_ngu === 'en'
-        )?.baiviet_ngonngu?.tieu_de || '';
+      const englishTitle = result.find(r => r.id === item.id && r.baiviet_ngonngu?.ngon_ngu === 'en')?.baiviet_ngonngu?.tieu_de || '';
       baivietsMap.set(item.id, {
         id: item.id,
         thumucId: item.thumucId,
         anh: item.anh,
         vi_tri: item.vi_tri,
         tieu_de: englishTitle,
-        baiviet_ngonngu: [],
+        baiviet_ngonngu: []
       });
     }
 
-    // Thêm thông tin baiviet_ngonngu nếu có
     if (item.baiviet_ngonngu?.id) {
       baivietsMap.get(item.id).baiviet_ngonngu.push(item.baiviet_ngonngu);
     }
   }
 
-  // Chuyển đổi Map thành mảng
-  const baiviets = Array.from(baivietsMap.values());
-
-  return baiviets;
+  return Array.from(baivietsMap.values());
 });

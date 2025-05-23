@@ -187,36 +187,61 @@ body {
 }
 
 .p-toolbar-center {
-  width: 80%;
+  width: calc(100% - 100px - 55px);
+}
+
+.container1 {
+  padding-left: 0;
+  padding-right: 0;
+  width: 100% !important;
 }
 
 @media screen and (min-width: 768px) {
   .p-toolbar-center {
-    width: 40%;
+    width: calc(75% - 100px - 55px);
+  }
+  .container1 {
+    padding-left: calc((20% - 4rem) / 2);
+    padding-right: calc((20% - 4rem) / 2);
   }
 }
 
-
 @media screen and (min-width: 1024px) {
   .p-toolbar-center {
-    width: 50%;
+    width: calc(80% - 100px - 55px);
+  }
+  .container1 {
+    padding-left: calc((30% - 4rem) / 2);
+    padding-right: calc((30% - 4rem) / 2);
   }
 }
 
 @media screen and (min-width: 1200px) {
   .p-toolbar-center {
-    width: 80%;
+    width: calc(75% - 100px - 55px);
+  }
+  .container1 {
+    padding-left: calc((30% - 4rem) / 2);
+    padding-right: calc((30% - 4rem) / 2);
   }
 }
 
 @media screen and (min-width: 1440px) {
   .p-toolbar-center {
-    width: 60%;
+    width: calc(70% - 100px - 55px);
+  }
+  .container {
+    padding-left: calc((30% - 4rem) / 2);
+    padding-right: calc((30% - 4rem) / 2);
   }
 }
 
 @media screen and (min-width: 1920px) {
   .p-toolbar-center {
-    width: 50%;
+    width: calc(60% - 100px - 55px);
+  }
+  .container {
+    padding-left: calc((40% - 4rem) / 2);
+    padding-right: calc((40% - 4rem) / 2);
   }
 }

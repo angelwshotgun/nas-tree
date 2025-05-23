@@ -1,3 +1,5 @@
 {
-    "search_placeholder": "ค้นหา",
-  "search_placeholder1": "ป้อนคำค้นหา"}
+  "search_placeholder": "ค้นหา",
+  "search_placeholder1": "ป้อนคำค้นหา",
+  "search_no_results": "ไม่พบผลลัพธ์"
+}

@@ -11,13 +11,12 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { storage } from "~/plugins/firebase"; // Ensure you have this file set up with Firebase configuration
+import { storage } from "~/plugins/firebase";
 
 const isTranslating = ref(false);
 const isMounted = ref(false);
 const closeEscapeKeyModalInfo = ref<boolean>(true);
 const confirm = useConfirm();
-const ConfirmDialog = useConfirmDialog();
 const toast = useToast();
 const thuMucSelect = ref();
 const uploadedImageUrls = ref<string[]>([]);
@@ -111,7 +110,6 @@ const translateWithGenAI = async () => {
   try {
     isTranslating.value = true;
 
-    // Gọi API dịch cho tiêu đề
     const responseTitle = await $fetch("/api/translate", {
       method: "POST",
       body: {
@@ -120,7 +118,6 @@ const translateWithGenAI = async () => {
       },
     });
 
-    // Gọi API dịch cho mô tả nếu có
     let responseDesc = null;
     if (sourceDesc) {
       responseDesc = await $fetch("/api/translate", {
@@ -143,33 +140,27 @@ const translateWithGenAI = async () => {
       });
     }
 
-    // Xử lý kết quả dịch tiêu đề
     if (responseTitle && responseTitle.translations) {
-      // Cập nhật tiếng Hàn
       if (responseTitle.translations.ko) {
         initialValues.value.baiviet_ngonngu[1].tieu_de =
           responseTitle.translations.ko;
       }
 
-      // Cập nhật tiếng Pháp
       if (responseTitle.translations.fr) {
         initialValues.value.baiviet_ngonngu[2].tieu_de =
           responseTitle.translations.fr;
       }
 
-      // Cập nhật tiếng Nhật
       if (responseTitle.translations.ja) {
         initialValues.value.baiviet_ngonngu[3].tieu_de =
           responseTitle.translations.ja;
       }
 
-      // Cập nhật tiếng Tây Ban Nha
       if (responseTitle.translations.es) {
         initialValues.value.baiviet_ngonngu[4].tieu_de =
           responseTitle.translations.es;
       }
 
-      // Cập nhật tiếng Thái
       if (responseTitle.translations.th) {
         initialValues.value.baiviet_ngonngu[5].tieu_de =
           responseTitle.translations.th;
@@ -183,33 +174,27 @@ const translateWithGenAI = async () => {
       });
     }
 
-    // Xử lý kết quả dịch mô tả
     if (responseDesc && responseDesc.translations) {
-      // Cập nhật tiếng Hàn
       if (responseDesc.translations.ko) {
         initialValues.value.baiviet_ngonngu[1].mo_ta =
           responseDesc.translations.ko;
       }
 
-      // Cập nhật tiếng Pháp
       if (responseDesc.translations.fr) {
         initialValues.value.baiviet_ngonngu[2].mo_ta =
           responseDesc.translations.fr;
       }
 
-      // Cập nhật tiếng Nhật
       if (responseDesc.translations.ja) {
         initialValues.value.baiviet_ngonngu[3].mo_ta =
           responseDesc.translations.ja;
       }
 
-      // Cập nhật tiếng Tây Ban Nha
       if (responseDesc.translations.es) {
         initialValues.value.baiviet_ngonngu[4].mo_ta =
           responseDesc.translations.es;
       }
 
-      // Cập nhật tiếng Thái
       if (responseDesc.translations.th) {
         initialValues.value.baiviet_ngonngu[5].mo_ta =
           responseDesc.translations.th;
@@ -223,29 +208,23 @@ const translateWithGenAI = async () => {
       });
     }
 
-    // Xử lý kết quả dịch nội dung
     if (responseContent && responseContent.translations && isEnabled.value) {
-      // Cập nhật tiếng Hàn
       if (responseContent.translations.ko) {
         initialValues.value.baiviet_ngonngu[1].noi_dung = `${responseContent.translations.ko}`;
       }
 
-      // Cập nhật tiếng Pháp
       if (responseContent.translations.fr) {
         initialValues.value.baiviet_ngonngu[2].noi_dung = `${responseContent.translations.fr}`;
       }
 
-      // Cập nhật tiếng Nhật
       if (responseContent.translations.ja) {
         initialValues.value.baiviet_ngonngu[3].noi_dung = `${responseContent.translations.ja}`;
       }
 
-      // Cập nhật tiếng Tây Ban Nha
       if (responseContent.translations.es) {
         initialValues.value.baiviet_ngonngu[4].noi_dung = `${responseContent.translations.es}`;
       }
 
-      // Cập nhật tiếng Thái
       if (responseContent.translations.th) {
         initialValues.value.baiviet_ngonngu[5].noi_dung = `${responseContent.translations.th}`;
       }
@@ -399,12 +378,10 @@ watchEffect(() => {
       }
     }
 
-    // Xử lý dữ liệu đa ngôn ngữ nếu có
     if (
       props.baiViet?.baiviet_ngonngu &&
       props.baiViet.baiviet_ngonngu.length > 0
     ) {
-      // Tạo mảng ngôn ngữ chuẩn
       let standardNgonNgu = [
         {
           tieu_de: "",
@@ -450,7 +427,6 @@ watchEffect(() => {
         },
       ];
 
-      // Gán giá trị từ dữ liệu hiện có vào đúng vị trí
       for (const ngonNgu of props.baiViet.baiviet_ngonngu) {
         const index = standardNgonNgu.findIndex(
           (item) => item.ngon_ngu === ngonNgu.ngon_ngu

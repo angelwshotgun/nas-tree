@@ -2011,7 +2011,7 @@
     which "^5.0.0"
     ws "^8.18.1"
 
-"@nuxt/kit@3.16.1", "@nuxt/kit@^3.14.1592", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.16.0", "@nuxt/kit@^3.16.1":
+"@nuxt/kit@3.16.1", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.16.0", "@nuxt/kit@^3.16.1":
   version "3.16.1"
   resolved "https://registry.npmjs.org/@nuxt/kit/-/kit-3.16.1.tgz"
   integrity sha512-Perby8hJGUeCWad5oTVXb/Ibvp18ZCUC5PxHHu+acMDmVfnxSo48yqk7qNd09VkTF3LEzoEjNZpmW2ZWN0ry7A==
@@ -3172,6 +3172,14 @@
   resolved "https://registry.npmjs.org/@types/phoenix/-/phoenix-1.6.6.tgz"
   integrity sha512-PIzZZlEppgrpoT2QgbnDU+MMzuR6BbCjllj0bM70lWoejMeNJAxCchxnv7J3XFkI8MpygtRpzXrIlmWUBclP5A==
 
+"@types/quill@^2.0.14":
+  version "2.0.14"
+  resolved "https://registry.yarnpkg.com/@types/quill/-/quill-2.0.14.tgz#78309020cccd6d9569bbba5733f4329a4ae76b47"
+  integrity sha512-zvoXCRnc2Dl8g+7/9VSAmRWPN6oH+MVhTPizmCR+GJCITplZ5VRVzMs4+a/nOE3yzNwEZqylJJrMB07bwbM1/g==
+  dependencies:
+    parchment "^1.1.2"
+    quill-delta "^5.1.0"
+
 "@types/resolve@1.20.2":
   version "1.20.2"
   resolved "https://registry.npmjs.org/@types/resolve/-/resolve-1.20.2.tgz"
@@ -3732,7 +3740,7 @@
   resolved "https://registry.npmjs.org/@vue/shared/-/shared-3.5.13.tgz"
   integrity sha512-/hnE/qP5ZoGpol0a5mDi45bOd7t3tjYJBjsgCsivow7D48cJeV5l05RD82lPqi7gRiphZM37rnhW1l6ZoCNNnQ==
 
-"@vueuse/core@13.0.0", "@vueuse/core@^13.0.0":
+"@vueuse/core@13.0.0":
   version "13.0.0"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-13.0.0.tgz#60bf419e3f9fb003b51f1dfed550afffdb1691ff"
   integrity sha512-rkgb4a8/0b234lMGCT29WkCjPfsX0oxrIRR7FDndRoW3FsaC9NBzefXg/9TLhAgwM11f49XnutshM4LzJBrQ5g==
@@ -3741,10 +3749,24 @@
     "@vueuse/metadata" "13.0.0"
     "@vueuse/shared" "13.0.0"
 
+"@vueuse/core@^13.2.0":
+  version "13.2.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-13.2.0.tgz#f19afa06449110ff3a649ea06b661c3c37c43c34"
+  integrity sha512-n5TZoIAxbWAQ3PqdVPDzLgIRQOujFfMlatdI+f7ditSmoEeNpPBvp7h2zamzikCmrhFIePAwdEQB6ENccHr7Rg==
+  dependencies:
+    "@types/web-bluetooth" "^0.0.21"
+    "@vueuse/metadata" "13.2.0"
+    "@vueuse/shared" "13.2.0"
+
 "@vueuse/metadata@13.0.0":
   version "13.0.0"
   resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-13.0.0.tgz#f9c70e1d4958869693e6dcf385d3294cdd304b58"
   integrity sha512-TRNksqmvtvqsuHf7bbgH9OSXEV2b6+M3BSN4LR5oxWKykOFT9gV78+C2/0++Pq9KCp9KQ1OQDPvGlWNQpOb2Mw==
+
+"@vueuse/metadata@13.2.0":
+  version "13.2.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-13.2.0.tgz#a839028d43c3206b674dd1d59a77b9c80f4d9d5f"
+  integrity sha512-kPpzuQCU0+D8DZCzK0iPpIcXI+6ufWSgwnjJ6//GNpEn+SHViaCtR+XurzORChSgvpHO9YC8gGM97Y1kB+UabA==
 
 "@vueuse/nuxt@^13.0.0":
   version "13.0.0"
@@ -3760,6 +3782,11 @@
   version "13.0.0"
   resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-13.0.0.tgz#4bc454ac359303904d4cf9b23e0dd265be90bf2d"
   integrity sha512-9MiHhAPw+sqCF/RLo8V6HsjRqEdNEWVpDLm2WBRW2G/kSQjb8X901sozXpSCaeLG0f7TEfMrT4XNaA5m1ez7Dg==
+
+"@vueuse/shared@13.2.0":
+  version "13.2.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-13.2.0.tgz#26d89103201bafc7daa4dfc5bc92b512526b788b"
+  integrity sha512-vx9ZPDF5HcU9up3Jgt3G62dMUfZEdk6tLyBAHYAG4F4n73vpaA7J5hdncDI/lS9Vm7GA/FPlbOmh9TrDZROTpg==
 
 "@whatwg-node/disposablestack@^0.0.6":
   version "0.0.6"
@@ -6149,11 +6176,6 @@ graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.10, graceful-fs@^4.2.11
   resolved "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.11.tgz"
   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
 
-gsap@^3.12.5, gsap@^3.12.7:
-  version "3.12.7"
-  resolved "https://registry.npmjs.org/gsap/-/gsap-3.12.7.tgz"
-  integrity sha512-V4GsyVamhmKefvcAKaoy0h6si0xX7ogwBoBSs2CTJwt7luW0oZzC0LhdkyuKV8PJAXr7Yaj8pMjCKD4GJ+eEMg==
-
 gtoken@^7.0.0:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/gtoken/-/gtoken-7.1.0.tgz#d61b4ebd10132222817f7222b1e6064bd463fc26"
@@ -8070,6 +8092,11 @@ package-manager-detector@^1.1.0:
   resolved "https://registry.npmjs.org/package-manager-detector/-/package-manager-detector-1.1.0.tgz"
   integrity sha512-Y8f9qUlBzW8qauJjd/eu6jlpJZsuPJm2ZAV0cDVd420o4EdpH5RPdoCv+60/TdJflGatr4sDfpAL6ArWZbM5tA==
 
+parchment@^1.1.2:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/parchment/-/parchment-1.1.4.tgz#aeded7ab938fe921d4c34bc339ce1168bc2ffde5"
+  integrity sha512-J5FBQt/pM2inLzg4hEWmzQx/8h8D0CiDxaG3vyp9rKrQRSDgBlhjdP5jQGgosEajXPSQouXGHOmVdgo7QmJuOg==
+
 parchment@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/parchment/-/parchment-3.0.0.tgz#2e3a4ada454e1206ae76ea7afcb50e9fb517e7d6"
@@ -9427,11 +9454,6 @@ smob@^1.0.0:
   resolved "https://registry.npmjs.org/smob/-/smob-1.5.0.tgz"
   integrity sha512-g6T+p7QO8npa+/hNx9ohv1E5pVCmWrVCUzUXJyLdMmftX6ER0oiWY/w9knEonLpnOp6b6FenKnMfR8gqwWdwig==
 
-sortablejs@1.14.0:
-  version "1.14.0"
-  resolved "https://registry.npmjs.org/sortablejs/-/sortablejs-1.14.0.tgz"
-  integrity sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==
-
 source-map-js@^1.0.1, source-map-js@^1.0.2, source-map-js@^1.2.0, source-map-js@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.1.tgz"
@@ -10396,15 +10418,6 @@ uuid@^9.0.1:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
   integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
-v-gsap-nuxt@1.3.19:
-  version "1.3.19"
-  resolved "https://registry.npmjs.org/v-gsap-nuxt/-/v-gsap-nuxt-1.3.19.tgz"
-  integrity sha512-H9UYGvT15nMjGA9ft0ka3kf8pESWGWBMmk4V9e4vKFwxtkNhR2MOv2sukgIywLMDdR7WjzX4+EV3b6yQMdNzkA==
-  dependencies:
-    "@nuxt/kit" "^3.14.1592"
-    defu "^6.1.4"
-    gsap "^3.12.5"
-
 validate-npm-package-license@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/validate-npm-package-license/-/validate-npm-package-license-3.0.4.tgz#fc91f6b9c7ba15c857f4cb2c5defeec39d4f410a"
@@ -10551,13 +10564,6 @@ vue@^3.4, vue@^3.5.13:
     "@vue/runtime-dom" "3.5.13"
     "@vue/server-renderer" "3.5.13"
     "@vue/shared" "3.5.13"
-
-vuedraggable@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.npmjs.org/vuedraggable/-/vuedraggable-4.1.0.tgz"
-  integrity sha512-FU5HCWBmsf20GpP3eudURW3WdWTKIbEIQxh9/8GE806hydR9qZqRRxRE3RjqX7PkuLuMQG/A7n3cfj9rCEchww==
-  dependencies:
-    sortablejs "1.14.0"
 
 web-streams-polyfill@^3.0.3:
   version "3.3.3"

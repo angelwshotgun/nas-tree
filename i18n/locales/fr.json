@@ -1,4 +1,5 @@
 { 
-    "search_placeholder": "Rechercher",
-  "search_placeholder1": "Entrez des mots-clés pour rechercher"
-  }
+  "search_placeholder": "Rechercher",
+  "search_placeholder1": "Entrez des mots-clés pour rechercher",
+  "search_no_results": "Aucun résultat trouvé"
+}

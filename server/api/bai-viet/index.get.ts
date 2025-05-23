@@ -1,6 +1,11 @@
 export default defineEventHandler(async (event) => {
-  // Lấy dữ liệu từ cơ sở dữ liệu
-  const result = await useDrizzle()
+  // Lấy thumucId từ query params
+  const query = getQuery(event);
+  const thumucIdRaw = query.thumucId;
+  const thumucId = thumucIdRaw !== undefined ? Number(thumucIdRaw) : undefined;
+
+  // Tạo query builder
+  let queryBuilder = useDrizzle()
     .select({
       id: tables.baiviet.id,
       thumucId: tables.baiviet.thumucId,
@@ -26,21 +31,28 @@ export default defineEventHandler(async (event) => {
       eq(tables.baiviet.id, tables.baiviet_ngonngu.baivietId)
     )
     .leftJoin(tables.thumuc, eq(tables.baiviet.thumucId, tables.thumuc.id))
-    .all();
+    .where(
+      thumucId !== undefined ? eq(tables.baiviet.thumucId, thumucId) : undefined
+    );
+
+  const result = await queryBuilder.all();
 
   // Nhóm dữ liệu theo bài viết
   const baivietsMap = new Map();
 
   for (const item of result) {
     if (!baivietsMap.has(item.id)) {
-      const englishTitle = result.find(r => r.id === item.id && r.baiviet_ngonngu?.ngon_ngu === 'en')?.baiviet_ngonngu?.tieu_de || '';
+      const englishTitle =
+        result.find(
+          (r) => r.id === item.id && r.baiviet_ngonngu?.ngon_ngu === 'en'
+        )?.baiviet_ngonngu?.tieu_de || '';
       baivietsMap.set(item.id, {
         id: item.id,
         thumucId: item.thumucId,
         anh: item.anh,
         vi_tri: item.vi_tri,
         tieu_de: englishTitle,
-        baiviet_ngonngu: []
+        baiviet_ngonngu: [],
       });
     }
 
@@ -52,6 +64,6 @@ export default defineEventHandler(async (event) => {
 
   // Chuyển đổi Map thành mảng
   const baiviets = Array.from(baivietsMap.values());
-  
+
   return baiviets;
 });

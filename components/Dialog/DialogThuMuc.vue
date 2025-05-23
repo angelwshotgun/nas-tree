@@ -2,14 +2,12 @@
 import { yupResolver } from '@primevue/forms/resolvers/yup';
 import * as yup from 'yup';
 import type { FormSubmitEvent, FormInstance } from '@primevue/forms/form';
-import type { ThuMucModel, ThuMucNgonNguModel } from '~/models/thu-muc.model';
+import type { ThuMucModel } from '~/models/thu-muc.model';
 import { ThuMucService } from '~/services/thu-muc.service';
 
-const isMounted = ref(false);
 const closeEscapeKeyModalInfo = ref(true);
 const confirm = useConfirm();
 const toast = useToast();
-const thuMucSelect = ref();
 const isTranslating = ref(false);
 
 const props = defineProps({
@@ -38,7 +36,6 @@ const resolver = ref(
   )
 );
 
-// Định nghĩa đúng thứ tự các ngôn ngữ với đúng locale tương ứng
 const initialValues = ref<ThuMucModel>({
   id: 0,
   thu_tu: 0,
@@ -55,7 +52,6 @@ const initialValues = ref<ThuMucModel>({
   ],
 });
 
-// Hàm dịch tự động sử dụng Google GenAI
 const translateWithGenAI = async () => {
   const englishText = initialValues.value.thumuc_ngonngu[0].ten_thumuc.trim();
   
@@ -67,7 +63,6 @@ const translateWithGenAI = async () => {
   try {
     isTranslating.value = true;
     
-    // Gọi API dịch
     const response = await $fetch('/api/translate', {
       method: 'POST',
       body: {
@@ -76,32 +71,26 @@ const translateWithGenAI = async () => {
       }
     });
     
-    // Kiểm tra và cập nhật các bản dịch
     if (response && response.translations) {
  
-      // Cập nhật tiếng Hàn
       if (response.translations.ko) {
-        initialValues.value.thumuc_ngonngu[2].ten_thumuc = response.translations.ko;
+        initialValues.value.thumuc_ngonngu[1].ten_thumuc = response.translations.ko;
       }
 
-      // Cập nhật tiếng Pháp
       if (response.translations.fr) {
-        initialValues.value.thumuc_ngonngu[3].ten_thumuc = response.translations.fr;
+        initialValues.value.thumuc_ngonngu[2].ten_thumuc = response.translations.fr;
       }
 
-      // Cập nhật tiếng Nhật
       if (response.translations.ja) {
-        initialValues.value.thumuc_ngonngu[4].ten_thumuc = response.translations.ja;
+        initialValues.value.thumuc_ngonngu[3].ten_thumuc = response.translations.ja;
       }
 
-      // Cập nhật tiếng Tây Ban Nha
       if (response.translations.es) {
-        initialValues.value.thumuc_ngonngu[5].ten_thumuc = response.translations.es;
+        initialValues.value.thumuc_ngonngu[4].ten_thumuc = response.translations.es;
       }
 
-      // Cập nhật tiếng Thái
       if (response.translations.th) {
-        initialValues.value.thumuc_ngonngu[6].ten_thumuc = response.translations.th;
+        initialValues.value.thumuc_ngonngu[5].ten_thumuc = response.translations.th;
       }
       
       toast.add({ severity: 'success', summary: 'Thành công', detail: 'Dịch tự động hoàn tất!', life: 3000 });
@@ -115,7 +104,6 @@ const translateWithGenAI = async () => {
     isTranslating.value = false;
   }
 };
-
 const onSubmit = (e: FormSubmitEvent) => {
   if (e.valid) {
     const ThuMucDTO: ThuMucModel = {
@@ -172,7 +160,6 @@ const handleHideModal = () => {
 
 watchEffect(() => {
   if (props.thuMuc?.id) {
-    // Clone thư mục và sắp xếp lại ngôn ngữ nếu cần
     const thuMuc = { ...props.thuMuc };
     let standardNgonNgu = [
       { ten_thumuc: '', ngon_ngu: 'en', locale: 'en-US' },
@@ -183,9 +170,7 @@ watchEffect(() => {
     { ten_thumuc: '', ngon_ngu: 'th', locale: 'th-TH' },
     ];
     
-    // Nếu đã có dữ liệu thumuc_ngonngu, cần đảm bảo thứ tự đúng
     if (thuMuc.thumuc_ngonngu && thuMuc.thumuc_ngonngu.length > 0) {
-      // Gán giá trị từ dữ liệu hiện có vào đúng vị trí
       for (const ngonNgu of thuMuc.thumuc_ngonngu) {
         const index = standardNgonNgu.findIndex(item => item.ngon_ngu === ngonNgu.ngon_ngu);
         if (index !== -1) {
