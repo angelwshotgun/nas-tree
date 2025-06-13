@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: [// "@unocss/nuxt",
-  '@sidebase/nuxt-auth', '@vueuse/nuxt', '@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/google-fonts', '@nuxthub/core', '@nuxtjs/i18n'],
+  '@sidebase/nuxt-auth', '@vueuse/nuxt', '@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/google-fonts', '@nuxthub/core', '@nuxtjs/i18n', '@nuxt/image'],
   runtimeConfig: {
     GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
     GOOGLE_AI_API_KEY2: process.env.GOOGLE_AI_API_KEY2,

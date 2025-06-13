@@ -3,53 +3,68 @@
     <div
       v-for="(baiviet, index) in paginatedBaiViet"
       :key="baiviet.id"
-      class="flex flex-col md:flex-row gap-5 border-b border-gray-200 pb-8 w-full"
+      class="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-5 border-b border-gray-200 pb-8 w-full"
     >
-      <div 
-        class="relative w-full md:w-[300px] h-auto md:mt-0 swipe-container"
+      <div
+        class="relative w-full swipe-container overflow-visible"
         :ref="el => { if (el) swipeContainers[getGlobalIndex(index)] = el as HTMLElement }"
       >
-        <Galleria
-          v-model:activeIndex="activeIndices[getGlobalIndex(index)]"
-          :value="JSON.parse(baiviet?.anh ?? '[]')"
-          :numVisible="1"
-          :circular="true"
-          :showThumbnails="false"
-          :autoPlay="true"
-          :transitionInterval="10000"
-          class="swipe-galleria"
-          :showItemNavigators="JSON.parse(baiviet?.anh ?? '[]').length > 1"
-        >
-          <template #item="slotProps">
-            <img
-              :src="slotProps.item"
-              alt="Hình ảnh bài viết"
-              class="w-full h-auto object-cover rounded-lg"
-              :class="{ 'cursor-pointer': isNavigable(baiviet) }"
-              @click="navigateToArticle(baiviet)"
-            />
-          </template>
-        </Galleria>
-        <div
-          v-if="baiviet.vi_tri"
-          class="absolute -bottom-4 -right-4 w-12 h-12 bg-black rounded-full flex items-center justify-center"
-        >
-          <a :href="baiviet.vi_tri" target="_blank" class="cursor-pointer">
-            <i
-              :class="[
-                isGoogleMapsLink(baiviet.vi_tri)
-                  ? 'pi pi-map-marker'
-                  : 'pi pi-link',
-                'text-white text-xl',
-              ]"
-            ></i>
-          </a>
+        <div class="relative">
+          <Galleria
+            v-model:activeIndex="activeIndices[getGlobalIndex(index)]"
+            :value="JSON.parse(baiviet?.anh ?? '[]')"
+            :numVisible="1"
+            :circular="true"
+            :showThumbnails="false"
+            :autoPlay="true"
+            :transitionInterval="10000"
+            class="swipe-galleria"
+            :showItemNavigators="JSON.parse(baiviet?.anh ?? '[]').length > 1"
+          >
+            <template #item="slotProps">
+              <NuxtImg
+                :src="slotProps.item"
+                :alt="`Hình ảnh bài viết ${
+                  baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)
+                    ?.tieu_de || ''
+                }`"
+                class="w-full h-auto object-cover rounded-lg"
+                :class="{ 'cursor-pointer': isNavigable(baiviet) }"
+                @click="navigateToArticle(baiviet)"
+                loading="lazy"
+                format="webp"
+                quality="80"
+                sizes="sm:300px md:300px lg:300px xl:300px"
+                placeholder
+                :modifiers="{
+                  fit: 'cover',
+                  quality: 80,
+                  format: 'webp',
+                }"
+              />
+            </template>
+          </Galleria>
+          <div
+            v-if="baiviet.vi_tri"
+            class="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center z-20 shadow-lg"
+          >
+            <a :href="baiviet.vi_tri" target="_blank" class="cursor-pointer">
+              <i
+                :class="[
+                  isGoogleMapsLink(baiviet.vi_tri)
+                    ? 'pi pi-map-marker'
+                    : 'pi pi-link',
+                  'text-white text-xl',
+                ]"
+              ></i>
+            </a>
+          </div>
         </div>
       </div>
-      <div class="w-full md:w-[80%]">
+      <div class="w-full min-w-0">
         <h2
-          class="text-xl font-bold mb-3"
-          :class="{ 'cursor-pointer text-primary': isNavigable(baiviet) }"
+          class="text-xl font-bold mb-3 text-primary"
+          :class="{ 'cursor-pointer': isNavigable(baiviet) }"
           @click="navigateToArticle(baiviet)"
         >
           {{
@@ -122,7 +137,9 @@ await BaiVietService.GetBaiVietList(id).then((res) => {
 });
 
 function isNavigable(article: BaiVietModel): boolean {
-  return article.noi_dung !== '';
+  return Array.isArray(article.baiviet_ngonngu) &&
+    article.baiviet_ngonngu.length > 0 &&
+    article.baiviet_ngonngu[0].noi_dung !== '';
 }
 
 function isGoogleMapsLink(url: string | null | undefined): boolean {
@@ -144,10 +161,10 @@ function navigateToArticle(article: BaiVietModel): void {
 function onPageChange(event: PageState) {
   first.value = event.first;
   itemsPerPage.value = event.rows;
-  
+
   // Scroll lên đầu trang khi chuyển trang
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  
+
   // Cập nhật lại swipe containers cho trang mới
   nextTick(() => {
     setupSwipeContainers();
@@ -161,10 +178,12 @@ function handleSwipe(globalIndex: number, direction: string) {
 
   if (direction === 'left') {
     // Chuyển đến ảnh tiếp theo
-    activeIndices.value[globalIndex] = (activeIndices.value[globalIndex] + 1) % images.length;
+    activeIndices.value[globalIndex] =
+      (activeIndices.value[globalIndex] + 1) % images.length;
   } else if (direction === 'right') {
     // Chuyển đến ảnh trước đó
-    activeIndices.value[globalIndex] = (activeIndices.value[globalIndex] - 1 + images.length) % images.length;
+    activeIndices.value[globalIndex] =
+      (activeIndices.value[globalIndex] - 1 + images.length) % images.length;
   }
 }
 
@@ -204,6 +223,23 @@ onMounted(() => {
 
 .swipe-container {
   touch-action: pan-y;
+}
+
+/* Đảm bảo container ảnh có kích thước cố định và cho phép button tràn ra ngoài */
+.swipe-container .relative {
+  position: relative;
+  isolation: isolate;
+  /* Thêm padding để button không bị cắt */
+  padding-bottom: 1.5rem;
+  padding-right: 1.5rem;
+  margin-bottom: -1.5rem;
+  margin-right: -1.5rem;
+}
+
+/* Đảm bảo Galleria không tràn ra ngoài */
+.swipe-galleria {
+  position: relative;
+  z-index: 1;
 }
 
 /* Custom styles cho Paginator */
