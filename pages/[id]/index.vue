@@ -23,6 +23,7 @@
           >
             <template #item="slotProps">
               <NuxtImg
+                format="avif"
                 :src="slotProps.item"
                 :alt="`Hình ảnh bài viết ${
                   baiviet.baiviet_ngonngu?.find((t) => t.ngon_ngu === locale)
